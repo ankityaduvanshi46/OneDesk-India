@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-size-multiplier: 1;
+  }
+
+  .font-sm { --font-size-multiplier: 0.875; }
+  .font-md { --font-size-multiplier: 1; }
+  .font-lg { --font-size-multiplier: 1.125; }
+  .font-xl { --font-size-multiplier: 1.25; }
+
+  html {
+    font-size: calc(16px * var(--font-size-multiplier, 1));
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-gray-800;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-primary;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent;
+  }
+
+  .tricolour-bar {
+    background: linear-gradient(90deg, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%);
+    height: 4px;
+  }
+
+  .skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
+  }
+
+  .btn-primary {
+    @apply bg-brand-primary text-white rounded-xl px-4 py-2 font-semibold hover:bg-orange-600 transition-colors focus-visible:ring-2 ring-brand-primary ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl px-4 py-2 font-medium border hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  }
+
+  .category-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 select-none;
+  }
+
+  .category-chip.active {
+    @apply shadow-md scale-105;
+  }
+
+  .service-card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 flex flex-col gap-3 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #FF9933 0%, #fff7ed 30%, #ffffff 50%, #dcfce7 70%, #138808 100%);
+}
+
+.dark .hero-gradient {
+  background: linear-gradient(135deg, #7C2D12 0%, #1c0a00 30%, #0a0a0a 50%, #052e16 70%, #064e3b 100%);
+}
