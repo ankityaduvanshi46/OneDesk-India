@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { services } from '../data/services'
+import { useAppStore } from '../store/useAppStore'
 import ServiceCard from '../components/ServiceCard'
 
 const WIZARD_STEPS = [
@@ -90,7 +90,10 @@ const WIZARD_STEPS = [
 
 export default function WizardPage() {
   const { t, i18n } = useTranslation()
+  const { getAllServices } = useAppStore()
   const lang = i18n.language
+
+  const allServices = getAllServices()
 
   const [stepIndex, setStepIndex] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -113,22 +116,22 @@ export default function WizardPage() {
   }
 
   const recommendedServices = recommendedIds
-    .map((id) => services.find((s) => s.id === id))
+    .map((id) => allServices.find((s) => s.id === id))
     .filter(Boolean)
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
       <Helmet>
         <title>What Do I Need? – Guided Assistant | {t('siteName')}</title>
-        <meta name="description" content="Step-by-step smart questionnaire to find the exact Indian government portal and documents you need." />
+        <meta name="description" content="Step-by-step smart questionnaire to find the exact Indian government portal and documents you need on OneDesk India." />
       </Helmet>
 
       <div className="text-center space-y-3 max-w-xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40 text-brand-primary text-xs font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-600 dark:text-gold-300 text-xs font-semibold border border-gold-500/30">
           <span>🧭</span>
           <span>Guided Government Service Finder</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+        <h1 className="text-3xl sm:text-4xl font-black text-gray-950 dark:text-white">
           {t('wizard.title')}
         </h1>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
@@ -141,7 +144,7 @@ export default function WizardPage() {
           <div
             key={i}
             className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-              stepIndex >= i ? 'bg-brand-primary' : 'bg-gray-200 dark:bg-gray-800'
+              stepIndex >= i ? 'bg-gradient-to-r from-saffron to-gold-500' : 'bg-gray-200 dark:bg-royal-800'
             }`}
           />
         ))}
@@ -168,7 +171,7 @@ export default function WizardPage() {
                 <button
                   key={opt.id}
                   onClick={() => handleSelectCategory(opt.id)}
-                  className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-brand-primary dark:hover:border-brand-primary hover:shadow-lg transition-all text-left flex flex-col gap-2 group"
+                  className="p-5 rounded-2xl luxury-glass hover:border-gold-500/60 transition-all text-left flex flex-col gap-2 group hover:scale-[1.02]"
                 >
                   <span className="text-3xl group-hover:scale-110 transition-transform">{opt.icon}</span>
                   <div className="font-bold text-base text-gray-900 dark:text-white">
@@ -198,7 +201,7 @@ export default function WizardPage() {
               >
                 ← {t('wizard.back')}
               </button>
-              <span className="text-xs text-gray-400">Step 2 of 2</span>
+              <span className="text-xs text-gray-400 font-medium">Step 2 of 2</span>
             </div>
 
             <div className="text-center">
@@ -213,12 +216,12 @@ export default function WizardPage() {
                 <button
                   key={subopt.id}
                   onClick={() => handleSelectSubgoal(subopt.serviceIds)}
-                  className="w-full p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-brand-primary hover:bg-orange-50/50 dark:hover:bg-orange-950/20 transition-all text-left flex items-center justify-between gap-4 shadow-sm"
+                  className="w-full p-4 rounded-2xl luxury-glass hover:border-gold-500/60 transition-all text-left flex items-center justify-between gap-4 shadow-sm group hover:scale-[1.01]"
                 >
                   <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                     {subopt.label}
                   </span>
-                  <span className="text-brand-primary text-sm font-bold">→</span>
+                  <span className="text-brand-primary text-sm font-bold group-hover:translate-x-1 transition-transform">→</span>
                 </button>
               ))}
             </div>
@@ -240,13 +243,14 @@ export default function WizardPage() {
               >
                 🔄 {t('wizard.restart')}
               </button>
-              <span className="text-xs text-green-600 dark:text-green-400 font-semibold">
-                ✓ Recommendations Ready
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                <span>✓</span>
+                <span>Recommendations Ready</span>
               </span>
             </div>
 
             <div className="text-center space-y-1">
-              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white">
                 {t('wizard.results')}
               </h2>
               <p className="text-xs text-gray-500">

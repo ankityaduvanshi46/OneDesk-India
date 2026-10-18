@@ -18,55 +18,63 @@
   }
 
   body {
-    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    @apply bg-slate-50 dark:bg-royal-900 text-gray-900 dark:text-gray-100 antialiased selection:bg-brand-primary selection:text-white;
     font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
   }
 
   * {
-    @apply border-gray-200 dark:border-gray-800;
+    @apply border-gray-200/80 dark:border-gray-800/80;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-primary;
+    @apply outline-2 outline-offset-2 outline-brand-primary ring-2 ring-brand-primary/30;
   }
 }
 
 @layer components {
-  .glass-card {
-    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50;
+  .luxury-glass {
+    @apply bg-white/85 dark:bg-royal-850/85 backdrop-blur-md border border-white/60 dark:border-gold-500/20 shadow-luxury dark:shadow-luxury-dark;
+  }
+
+  .luxury-card {
+    @apply bg-white dark:bg-royal-800/90 rounded-2xl border border-gray-100/80 dark:border-gray-700/50 p-5 flex flex-col gap-3 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1.5 hover:border-gold-500/40;
+  }
+
+  .gold-gradient-text {
+    @apply bg-gradient-to-r from-amber-600 via-gold-500 to-amber-700 dark:from-gold-300 dark:via-gold-400 dark:to-amber-500 bg-clip-text text-transparent font-bold;
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-primary via-orange-500 to-brand-secondary bg-clip-text text-transparent;
   }
 
   .tricolour-bar {
-    background: linear-gradient(90deg, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%);
-    height: 4px;
+    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+    height: 3.5px;
   }
 
-  .skeleton {
-    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
+  .btn-luxury {
+    @apply relative overflow-hidden bg-gradient-to-r from-saffron via-orange-600 to-saffron-600 text-white rounded-xl px-5 py-2.5 font-semibold shadow-md hover:shadow-glow-saffron hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
   }
 
-  .btn-primary {
-    @apply bg-brand-primary text-white rounded-xl px-4 py-2 font-semibold hover:bg-orange-600 transition-colors focus-visible:ring-2 ring-brand-primary ring-offset-2;
-  }
-
-  .btn-secondary {
-    @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl px-4 py-2 font-medium border hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  .btn-luxury-outline {
+    @apply bg-white/90 dark:bg-royal-800/90 backdrop-blur-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700/80 hover:border-gold-500/60 dark:hover:border-gold-500/60 rounded-xl px-5 py-2.5 font-semibold hover:shadow-sm transition-all duration-200;
   }
 
   .category-chip {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 select-none;
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 select-none;
   }
 
-  .category-chip.active {
-    @apply shadow-md scale-105;
+  .status-dot-pulse {
+    @apply relative flex h-2.5 w-2.5;
   }
 
-  .service-card {
-    @apply bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 flex flex-col gap-3 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer;
+  .status-dot-pulse span:first-child {
+    @apply animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75;
+  }
+
+  .status-dot-pulse span:last-child {
+    @apply relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500;
   }
 }
 
@@ -92,12 +100,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-.hero-gradient {
-  background: linear-gradient(135deg, #FF9933 0%, #fff7ed 30%, #ffffff 50%, #dcfce7 70%, #138808 100%);
-}
-
-.dark .hero-gradient {
-  background: linear-gradient(135deg, #7C2D12 0%, #1c0a00 30%, #0a0a0a 50%, #052e16 70%, #064e3b 100%);
 }

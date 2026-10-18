@@ -7,20 +7,24 @@ import HeroSection from '../components/HeroSection'
 import CategoryChips from '../components/CategoryChips'
 import StateSelector from '../components/StateSelector'
 import ServiceCard from '../components/ServiceCard'
-import { services, TRENDING_SERVICES } from '../data/services'
+import AddServiceModal from '../components/AddServiceModal'
+import { TRENDING_SERVICES } from '../data/services'
 import { useAppStore } from '../store/useAppStore'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
-  const { selectedState } = useAppStore()
+  const { selectedState, getAllServices } = useAppStore()
   const [activeCategory, setActiveCategory] = useState('all')
+  const [addModalOpen, setAddModalOpen] = useState(false)
+
+  const allServices = getAllServices()
 
   const trendingServices = useMemo(() => {
-    return TRENDING_SERVICES.map((id) => services.find((s) => s.id === id)).filter(Boolean)
-  }, [])
+    return TRENDING_SERVICES.map((id) => allServices.find((s) => s.id === id)).filter(Boolean)
+  }, [allServices])
 
   const filteredServices = useMemo(() => {
-    let list = [...services]
+    let list = [...allServices]
     if (activeCategory !== 'all') {
       list = list.filter((s) => s.category === activeCategory)
     }
@@ -32,13 +36,13 @@ export default function HomePage() {
       })
     }
     return list
-  }, [activeCategory, selectedState])
+  }, [allServices, activeCategory, selectedState])
 
   return (
     <div>
       <Helmet>
-        <title>{t('siteName')} – Indian Government Direct Services Directory</title>
-        <meta name="description" content="One-stop unofficial directory of direct links to 80+ Indian government service portals. Aadhaar, Voter ID, PAN, Driving Licence, PF, and more." />
+        <title>{t('siteName')} – Official Indian Government Direct Services Directory</title>
+        <meta name="description" content="OneDesk India: Luxury single-window directory of direct links to 80+ official Indian government service portals. Instant auto-sync and verified official domains." />
       </Helmet>
 
       <HeroSection />
@@ -71,10 +75,19 @@ export default function HomePage() {
                 <span>{t('categories.all')}</span>
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {filteredServices.length} {t('search.results')}
+                {filteredServices.length} {t('search.results')} • Auto-Updated
               </p>
             </div>
-            <StateSelector />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setAddModalOpen(true)}
+                className="btn-luxury-outline text-xs py-1.5 px-3 flex items-center gap-1.5"
+              >
+                <span>✨</span>
+                <span>Auto-Add Portal</span>
+              </button>
+              <StateSelector />
+            </div>
           </div>
 
           <CategoryChips activeCategory={activeCategory} onSelectCategory={setActiveCategory} />
@@ -91,23 +104,23 @@ export default function HomePage() {
           </motion.div>
         </section>
 
-        <section className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/10 rounded-l-full pointer-events-none" />
+        <section className="bg-gradient-to-r from-royal-850 via-royal-800 to-royal-850 rounded-3xl p-6 sm:p-10 text-white shadow-luxury-dark relative overflow-hidden border border-gold-500/25">
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(circle_at_right,rgba(212,175,55,0.15),transparent)] pointer-events-none" />
           <div className="max-w-2xl relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 text-xs font-semibold backdrop-blur-sm border border-gold-500/30">
               <span>🧭</span>
-              <span>Guided Assistant</span>
+              <span>Intelligent Guided Wizard</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight text-white">
               {t('wizard.title')}
             </h2>
-            <p className="text-orange-100 text-sm sm:text-base">
+            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
               {t('wizard.subtitle')}
             </p>
             <div className="pt-2">
               <Link
                 to="/wizard"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-orange-600 font-bold text-sm shadow-md hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all"
+                className="btn-luxury inline-flex items-center gap-2 text-sm px-7 py-3 font-bold"
               >
                 <span>🚀</span>
                 <span>{t('wizard.restart')}</span>
@@ -116,26 +129,35 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-2">
+        <section className="luxury-glass rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🛡️</span>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 {t('scamCheck.title')}
               </h2>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
-              {t('scamCheck.subtitle')}. Protect yourself from fraudulent domains and cyber scams.
+            <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
+              {t('scamCheck.subtitle')}. Protect your Aadhaar, PAN and sensitive information with our domain validator.
             </p>
           </div>
           <Link
             to="/scam-check"
-            className="btn-primary text-sm whitespace-nowrap px-6 py-2.5"
+            className="btn-luxury text-sm whitespace-nowrap px-6 py-2.5 shrink-0"
           >
             {t('scamCheck.check')} →
           </Link>
         </section>
       </div>
+
+      <AnimatePresence>
+        {addModalOpen && (
+          <AddServiceModal
+            isOpen={addModalOpen}
+            onClose={() => setAddModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

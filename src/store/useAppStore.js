@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { services as defaultServices } from '../data/services'
+import { isOfficialDomain, isValidUrl } from '../utils/helpers'
 
 export const useAppStore = create(
   persist(
@@ -12,6 +14,9 @@ export const useAppStore = create(
       recentlyOpened: [],
       recentSearches: [],
       quickLinks: [],
+      customServices: [],
+      lastSyncTime: Date.now(),
+      isAutoSyncing: false,
 
       setTheme: (theme) => {
         set({ theme })
@@ -82,6 +87,51 @@ export const useAppStore = create(
 
       reorderQuickLinks: (newOrder) => set({ quickLinks: newOrder }),
 
+      getAllServices: () => {
+        const { customServices } = get()
+        const seenUrls = new Set()
+        const combined = []
+
+        for (const s of [...customServices, ...defaultServices]) {
+          if (!seenUrls.has(s.url)) {
+            seenUrls.add(s.url)
+            combined.push(s)
+          }
+        }
+        return combined
+      },
+
+      addServiceAuto: (newService) => {
+        if (!isValidUrl(newService.url) || !isOfficialDomain(newService.url)) {
+          throw new Error('Only verified official government domains (.gov.in, .nic.in) can be added.')
+        }
+
+        const id = newService.id || 'service-' + Date.now()
+        const serviceToAdd = {
+          ...newService,
+          id,
+          verified: true,
+          isUserAdded: true,
+          addedAt: Date.now()
+        }
+
+        const existing = get().customServices.filter((s) => s.url !== newService.url)
+        set({
+          customServices: [serviceToAdd, ...existing],
+          lastSyncTime: Date.now()
+        })
+        return serviceToAdd
+      },
+
+      triggerAutoSync: async () => {
+        set({ isAutoSyncing: true })
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        set({
+          lastSyncTime: Date.now(),
+          isAutoSyncing: false
+        })
+      },
+
       initTheme: () => {
         const { theme } = get()
         if (theme === 'dark') {
@@ -90,7 +140,7 @@ export const useAppStore = create(
       }
     }),
     {
-      name: 'sarkari-seva-hub-store',
+      name: 'onedesk-india-store',
       partialize: (state) => ({
         theme: state.theme,
         language: state.language,
@@ -99,7 +149,9 @@ export const useAppStore = create(
         favourites: state.favourites,
         recentlyOpened: state.recentlyOpened,
         recentSearches: state.recentSearches,
-        quickLinks: state.quickLinks
+        quickLinks: state.quickLinks,
+        customServices: state.customServices,
+        lastSyncTime: state.lastSyncTime
       })
     }
   )

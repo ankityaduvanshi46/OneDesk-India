@@ -7,31 +7,36 @@ import Fuse from 'fuse.js'
 import CategoryChips from '../components/CategoryChips'
 import StateSelector from '../components/StateSelector'
 import ServiceCard from '../components/ServiceCard'
-import { services } from '../data/services'
+import AddServiceModal from '../components/AddServiceModal'
 import { useAppStore } from '../store/useAppStore'
 import { sanitizeInput } from '../utils/helpers'
-
-const fuse = new Fuse(services, {
-  keys: [
-    { name: 'name', weight: 3 },
-    { name: 'nameHi', weight: 3 },
-    { name: 'description', weight: 1.5 },
-    { name: 'descriptionHi', weight: 1.5 },
-    { name: 'keywords', weight: 2 },
-    { name: 'category', weight: 1 },
-    { name: 'documents', weight: 1.5 }
-  ],
-  threshold: 0.35,
-  minMatchCharLength: 2
-})
 
 export default function ServicesPage() {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { selectedState } = useAppStore()
+  const { selectedState, getAllServices } = useAppStore()
+
+  const allServices = getAllServices()
 
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [category, setCategory] = useState(searchParams.get('category') || 'all')
+  const [addModalOpen, setAddModalOpen] = useState(false)
+
+  const fuse = useMemo(() => {
+    return new Fuse(allServices, {
+      keys: [
+        { name: 'name', weight: 3 },
+        { name: 'nameHi', weight: 3 },
+        { name: 'description', weight: 1.5 },
+        { name: 'descriptionHi', weight: 1.5 },
+        { name: 'keywords', weight: 2 },
+        { name: 'category', weight: 1 },
+        { name: 'documents', weight: 1.5 }
+      ],
+      threshold: 0.35,
+      minMatchCharLength: 2
+    })
+  }, [allServices])
 
   useEffect(() => {
     const q = searchParams.get('q')
@@ -39,7 +44,7 @@ export default function ServicesPage() {
   }, [searchParams])
 
   const filteredServices = useMemo(() => {
-    let result = [...services]
+    let result = [...allServices]
 
     if (query.trim()) {
       const searchResults = fuse.search(query.trim())
@@ -59,7 +64,7 @@ export default function ServicesPage() {
     }
 
     return result
-  }, [query, category, selectedState])
+  }, [allServices, fuse, query, category, selectedState])
 
   const handleQueryChange = (val) => {
     const clean = sanitizeInput(val)
@@ -92,20 +97,29 @@ export default function ServicesPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Helmet>
         <title>All Services Directory – {t('siteName')}</title>
-        <meta name="description" content="Browse all 80+ official Indian government services. Direct portals for Aadhaar, Voter ID, PAN, Transport, e-District, Taxes, and Schemes." />
+        <meta name="description" content="Browse all 80+ official Indian government services on OneDesk India. Direct portals for Aadhaar, Voter ID, PAN, Transport, e-District, Taxes, and Schemes." />
       </Helmet>
 
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white">
               {t('categories.all')}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {filteredServices.length} {t('search.results')}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {filteredServices.length} {t('search.results')} • Auto-synchronized catalog
             </p>
           </div>
-          <StateSelector />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setAddModalOpen(true)}
+              className="btn-luxury text-xs py-2 px-3.5 flex items-center gap-1.5"
+            >
+              <span>✨</span>
+              <span>Auto-Add Portal</span>
+            </button>
+            <StateSelector />
+          </div>
         </div>
 
         <div className="relative max-w-xl">
@@ -115,7 +129,7 @@ export default function ServicesPage() {
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder={t('search.placeholder')}
-            className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 text-sm"
+            className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-royal-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 text-sm shadow-sm"
           />
           {query && (
             <button
@@ -142,7 +156,7 @@ export default function ServicesPage() {
           </AnimatePresence>
         </motion.div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-3xl p-12 text-center border border-gray-100 dark:border-gray-800 max-w-md mx-auto space-y-4 shadow-sm">
+        <div className="luxury-glass rounded-3xl p-12 text-center max-w-md mx-auto space-y-4">
           <div className="text-5xl" aria-hidden="true">🔍</div>
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {t('search.noResults')}
@@ -152,12 +166,21 @@ export default function ServicesPage() {
           </p>
           <button
             onClick={handleReset}
-            className="btn-primary text-sm px-6 py-2"
+            className="btn-luxury text-xs px-6 py-2.5"
           >
             Reset Filters
           </button>
         </div>
       )}
+
+      <AnimatePresence>
+        {addModalOpen && (
+          <AddServiceModal
+            isOpen={addModalOpen}
+            onClose={() => setAddModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

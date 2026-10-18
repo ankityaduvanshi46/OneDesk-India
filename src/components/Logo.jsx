@@ -20,7 +20,7 @@ export default function Logo({ size = 'md', showText = true, className = '' }) {
 
   return (
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      <div className={`${iconSizes[size] || iconSizes.md} shrink-0 relative flex items-center justify-center rounded-xl bg-gradient-to-br from-saffron-DEFAULT to-orange-600 shadow-sm p-1.5`}>
+      <div className={`${iconSizes[size] || iconSizes.md} shrink-0 relative flex items-center justify-center rounded-xl bg-gradient-to-br from-saffron to-orange-600 shadow-sm p-1.5`}>
         <svg viewBox="0 0 100 100" className="w-full h-full text-white" fill="none">
           <rect x="14" y="16" width="72" height="48" rx="8" fill="#0F1B5E" />
           <rect x="18" y="20" width="64" height="40" rx="5" fill="#FFFFFF" />
