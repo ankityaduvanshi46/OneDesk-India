@@ -131,8 +131,8 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* Floating Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Floating Toggle Button - positioned above mobile BottomNav */}
+      <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40">
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
@@ -151,7 +151,7 @@ export default function Chatbot() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-96 max-w-sm h-[520px] bg-white dark:bg-royal-850 rounded-2xl shadow-2xl border border-gold-500/30 flex flex-col overflow-hidden"
+            className="fixed bottom-36 right-3 sm:bottom-24 sm:right-6 z-50 w-[92vw] sm:w-96 max-w-sm h-[520px] bg-white dark:bg-royal-850 rounded-2xl shadow-2xl border border-gold-500/30 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-royal-900 text-white p-4 border-b border-gold-500/30 flex items-center justify-between">

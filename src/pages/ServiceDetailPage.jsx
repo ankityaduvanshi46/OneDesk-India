@@ -209,7 +209,7 @@ export default function ServiceDetailPage() {
         <div className="pt-4 border-t border-gray-100 dark:border-royal-750 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
             <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Verified Official Portal: <code className="font-mono font-bold">{new URL(service.url).hostname}</code></span>
+            <span>Verified Official Portal: <code className="font-mono font-bold">{(() => { try { return new URL(service.url).hostname } catch { return service.url || 'gov.in' } })()}</code></span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto flex-col sm:flex-row">

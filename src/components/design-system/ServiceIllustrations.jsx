@@ -321,6 +321,7 @@ export function WelfareIllustration({ className = 'w-24 h-24' }) {
 }
 
 export const SERVICE_ILLUSTRATIONS_MAP = {
+  // Title-case keys (legacy)
   Identity: IdentityIllustration,
   Transport: TransportIllustration,
   Certificates: CertificatesIllustration,
@@ -330,11 +331,22 @@ export const SERVICE_ILLUSTRATIONS_MAP = {
   'Employment & Labour': EmploymentIllustration,
   'Agriculture & Land': AgricultureIllustration,
   'Utilities & Civic': UtilitiesIllustration,
-  'Social Welfare & Pension': WelfareIllustration
+  'Social Welfare & Pension': WelfareIllustration,
+  // Lowercase slug keys (from services.js data)
+  identity: IdentityIllustration,
+  transport: TransportIllustration,
+  certificates: CertificatesIllustration,
+  'tax-finance': TaxFinanceIllustration,
+  education: EducationIllustration,
+  health: HealthIllustration,
+  jobs: EmploymentIllustration,
+  'land-property': AgricultureIllustration,
+  utilities: UtilitiesIllustration,
+  grievance: WelfareIllustration
 }
 
 export function ServiceIllustration({ category, className = 'w-20 h-20' }) {
-  const Component = SERVICE_ILLUSTRATIONS_MAP[category] || IdentityIllustration
+  const Component = SERVICE_ILLUSTRATIONS_MAP[category] ?? SERVICE_ILLUSTRATIONS_MAP[category?.toLowerCase()] ?? IdentityIllustration
   return <Component className={className} />
 }
 

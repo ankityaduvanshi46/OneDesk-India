@@ -240,7 +240,7 @@ export default function RegisterPage() {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Ramesh Kumar"
+                        placeholder="Enter your full legal name"
                         className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-royal-900 border border-gray-200 dark:border-royal-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                       />
                     </div>
@@ -260,7 +260,7 @@ export default function RegisterPage() {
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="citizen@example.com"
+                          placeholder="name@example.com"
                           className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-royal-900 border border-gray-200 dark:border-royal-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                         />
                       </div>
@@ -280,7 +280,7 @@ export default function RegisterPage() {
                           maxLength={10}
                           value={formData.mobile}
                           onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
-                          placeholder="9876543210"
+                          placeholder="Enter 10-digit mobile number"
                           className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-royal-900 border border-gray-200 dark:border-royal-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                         />
                       </div>
@@ -305,7 +305,7 @@ export default function RegisterPage() {
                         type="text"
                         value={formData.govIdNumber}
                         onChange={(e) => setFormData({ ...formData, govIdNumber: e.target.value.toUpperCase() })}
-                        placeholder={formData.govIdType === 'aadhaar_last4' ? 'e.g. 5432' : 'e.g. ABCDE1234F'}
+                        placeholder={formData.govIdType === 'aadhaar_last4' ? 'Last 4 digits (optional)' : 'ID number (optional)'}
                         className="col-span-2 px-3.5 py-2.5 bg-gray-50 dark:bg-royal-900 border border-gray-200 dark:border-royal-700 rounded-xl text-sm uppercase focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                       />
                     </div>

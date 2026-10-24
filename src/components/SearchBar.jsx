@@ -141,7 +141,11 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
           ref={inputRef}
           type="search"
           value={query}
-          onChange={(e) => { setQuery(sanitizeInput(e.target.value)); setIsOpen(true) }}
+          onChange={(e) => {
+            const rawVal = e.target.value.replace(/<[^>]*>/g, '').slice(0, 200)
+            setQuery(rawVal)
+            setIsOpen(true)
+          }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={compact ? t('search.placeholderShort') : t('search.placeholder')}

@@ -67,10 +67,10 @@ export default function ServicesPage() {
   }, [allServices, fuse, query, category, selectedState])
 
   const handleQueryChange = (val) => {
-    const clean = sanitizeInput(val)
-    setQuery(clean)
-    if (clean) {
-      searchParams.set('q', clean)
+    const rawVal = val.replace(/<[^>]*>/g, '').slice(0, 200)
+    setQuery(rawVal)
+    if (rawVal.trim()) {
+      searchParams.set('q', rawVal.trim())
     } else {
       searchParams.delete('q')
     }
