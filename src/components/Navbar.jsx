@@ -133,6 +133,8 @@ export default function Navbar() {
     navigate('/')
   }
 
+  const isHome = location.pathname === '/'
+
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
@@ -152,10 +154,16 @@ export default function Navbar() {
           <Logo size="md" />
         </Link>
 
-        {/* Global Compact Search Bar */}
-        <div className="flex-1 max-w-sm mx-2 hidden md:block">
-          <SearchBar compact />
-        </div>
+        {/* Global Compact Search Bar - appears on non-home pages or when scrolled on home */}
+        {(!isHome || scrolled) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 max-w-sm mx-2 hidden md:block"
+          >
+            <SearchBar compact />
+          </motion.div>
+        )}
 
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1 ml-auto" aria-label="Main navigation">

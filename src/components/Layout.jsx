@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import Navbar from './Navbar'
 import BottomNav from './BottomNav'
 import Footer from './Footer'
-import AutoSyncBanner from './AutoSyncBanner'
 import InstallPwaBanner from './InstallPwaBanner'
 import Chatbot from './Chatbot'
 import CookieBanner from './CookieBanner'
@@ -14,7 +13,6 @@ export default function Layout({ children }) {
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-royal-900 transition-colors duration-300">
       <div className="tricolour-bar" />
       <InstallPwaBanner />
-      <AutoSyncBanner />
       <Navbar />
       <main id="main-content" className="flex-1 pb-20 md:pb-0" tabIndex={-1}>
         {children}

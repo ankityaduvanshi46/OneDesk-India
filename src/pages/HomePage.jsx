@@ -206,22 +206,24 @@ export default function HomePage() {
         {/* SECTION 2: Trending Quick Services */}
         <section aria-labelledby="trending-heading">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className="text-2xl">🔥</span>
               <div>
-                <h2 id="trending-heading" className="text-xl font-bold text-gray-900 dark:text-white">
-                  {t('search.trending')}
+                <h2 id="trending-heading" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  {lang === 'hi' ? 'सर्वाधिक लोकप्रिय नागरिक सेवाएं' : 'Essential Citizen Services'}
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Most requested citizen services this week</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {lang === 'hi' ? 'इस सप्ताह सबसे अधिक उपयोग की जाने वाली सेवाएं' : 'Most requested government services with single-window facilitation'}
+                </p>
               </div>
             </div>
             <Link to="/services" className="text-xs font-bold text-saffron hover:underline flex items-center gap-1">
-              <span>{t('hero.cta')}</span>
+              <span>{t('hero.cta') || 'Explore All Portals'}</span>
               <span>→</span>
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {trendingServices.slice(0, 5).map((service, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trendingServices.slice(0, 6).map((service, index) => (
               <ServiceCard key={service.id} service={service} index={index} />
             ))}
           </div>
@@ -302,7 +304,7 @@ export default function HomePage() {
 
           <motion.div
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             <AnimatePresence mode="popLayout">
               {filteredServices.map((service, index) => (
