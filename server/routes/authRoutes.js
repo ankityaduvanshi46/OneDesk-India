@@ -2,12 +2,22 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import { User } from '../models/User.js'
 import { OTP } from '../models/OTP.js'
+import { Application } from '../models/Application.js'
+import { Document } from '../models/Document.js'
 import { AuditLog } from '../models/AuditLog.js'
 import { generateOTP, hashGovId, maskGovId } from '../utils/otp.js'
 import { generateRegisterId } from '../utils/idGenerator.js'
 import { sendOtpEmail } from '../utils/mailer.js'
 import { authenticate } from '../middleware/auth.js'
 import { authLimiter, otpLimiter } from '../middleware/rateLimiter.js'
+import { validateBody } from '../middleware/validate.js'
+import {
+  registerSchema,
+  loginSchema,
+  verifyOtpSchema,
+  resendOtpSchema,
+  updateProfileSchema
+} from '../schemas/index.js'
 
 const router = express.Router()
 
@@ -30,16 +40,9 @@ function generateTokenAndSetCookie(res, user) {
   return token
 }
 
-router.post('/register', authLimiter, async (req, res, next) => {
+router.post('/register', authLimiter, validateBody(registerSchema), async (req, res, next) => {
   try {
-    const { name, email, mobile, password, govIdNumber, govIdType = 'aadhaar_last4', state, city } = req.body
-
-    if (!name || !email || !mobile || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name, email, mobile number, and password are required fields.'
-      })
-    }
+    const { name, email, mobile, password, govIdNumber, govIdType = 'aadhaar_last4', state, city, dpdpConsent } = req.body
 
     const cleanEmail = email.trim().toLowerCase()
     const cleanMobile = mobile.trim()
@@ -48,6 +51,7 @@ router.post('/register', authLimiter, async (req, res, next) => {
     if (existingEmail) {
       return res.status(409).json({
         success: false,
+        code: 'DUPLICATE_ENTRY',
         field: 'email',
         message: 'An account with this email address already exists. Please log in instead.'
       })
@@ -57,6 +61,7 @@ router.post('/register', authLimiter, async (req, res, next) => {
     if (existingMobile) {
       return res.status(409).json({
         success: false,
+        code: 'DUPLICATE_ENTRY',
         field: 'mobile',
         message: 'An account with this mobile number already exists. Each citizen is allowed only one account.'
       })
@@ -72,8 +77,9 @@ router.post('/register', authLimiter, async (req, res, next) => {
       if (existingGovId) {
         return res.status(409).json({
           success: false,
+          code: 'DUPLICATE_ENTRY',
           field: 'govId',
-          message: 'An account is already linked to this Government Identity Number. Duplicate registrations are prohibited.'
+          message: 'An account is already linked to this Government Identity Number. Duplicate registrations are prohibited under our 1-Person-1-Account policy.'
         })
       }
     }
@@ -95,6 +101,8 @@ router.post('/register', authLimiter, async (req, res, next) => {
       govIdType,
       passwordHash: password,
       role: 'user',
+      consentGivenAt: new Date(),
+      consentVersion: 'DPDP-2023-v1',
       address: {
         state: state || '',
         city: city || ''
@@ -142,16 +150,9 @@ router.post('/register', authLimiter, async (req, res, next) => {
   }
 })
 
-router.post('/verify-otp', otpLimiter, async (req, res, next) => {
+router.post('/verify-otp', otpLimiter, validateBody(verifyOtpSchema), async (req, res, next) => {
   try {
-    const { email, code, type = 'email_verification' } = req.body
-
-    if (!email || !code) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and verification code are required.'
-      })
-    }
+    const { email, code, type } = req.body
 
     const cleanEmail = email.trim().toLowerCase()
     const otpRecord = await OTP.findOne({
@@ -228,12 +229,9 @@ router.post('/verify-otp', otpLimiter, async (req, res, next) => {
   }
 })
 
-router.post('/resend-otp', otpLimiter, async (req, res, next) => {
+router.post('/resend-otp', otpLimiter, validateBody(resendOtpSchema), async (req, res, next) => {
   try {
-    const { email, type = 'email_verification' } = req.body
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email address is required.' })
-    }
+    const { email, type } = req.body
 
     const cleanEmail = email.trim().toLowerCase()
     const user = await User.findOne({ email: cleanEmail })
@@ -268,16 +266,9 @@ router.post('/resend-otp', otpLimiter, async (req, res, next) => {
   }
 })
 
-router.post('/login', authLimiter, async (req, res, next) => {
+router.post('/login', authLimiter, validateBody(loginSchema), async (req, res, next) => {
   try {
     const { identifier, password } = req.body
-
-    if (!identifier || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide your Email, Mobile, or Register ID and password.'
-      })
-    }
 
     const cleanId = identifier.trim()
     const user = await User.findOne({
@@ -377,7 +368,7 @@ router.get('/me', authenticate, async (req, res) => {
   })
 })
 
-router.put('/profile', authenticate, async (req, res, next) => {
+router.put('/profile', authenticate, validateBody(updateProfileSchema), async (req, res, next) => {
   try {
     const { name, address, profilePhoto } = req.body
     const user = req.user
@@ -399,6 +390,73 @@ router.put('/profile', authenticate, async (req, res, next) => {
       success: true,
       message: 'Profile updated successfully.',
       user
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/export-data', authenticate, async (req, res, next) => {
+  try {
+    const userId = req.user._id
+    const [applications, documents, auditLogs] = await Promise.all([
+      Application.find({ userId }).lean(),
+      Document.find({ userId }).lean(),
+      AuditLog.find({ userId }).limit(100).lean()
+    ])
+
+    const archive = {
+      platform: 'OneDesk India Citizen Directorate',
+      exportDate: new Date().toISOString(),
+      actCompliance: 'DPDP Act 2023 - Right to Data Portability',
+      citizenProfile: req.user,
+      applicationsCount: applications.length,
+      applications,
+      documentsCount: documents.length,
+      documents,
+      auditHistory: auditLogs
+    }
+
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Content-Disposition', `attachment; filename="onedesk-data-export-${req.user.registerId}.json"`)
+    res.json(archive)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/delete-account', authenticate, async (req, res, next) => {
+  try {
+    const userId = req.user._id
+
+    const pendingApps = await Application.countDocuments({
+      userId,
+      status: { $in: ['submitted', 'in_review'] }
+    })
+
+    if (pendingApps > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete account while you have active applications in review. Please wait for completion or cancel them first.'
+      })
+    }
+
+    await Promise.all([
+      User.findByIdAndDelete(userId),
+      Application.deleteMany({ userId, status: 'draft' }),
+      OTP.deleteMany({ identifier: req.user.email })
+    ])
+
+    const isProduction = process.env.NODE_ENV === 'production'
+    res.clearCookie('onedesk_token', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax'
+    })
+
+    res.json({
+      success: true,
+      message: 'Your OneDesk citizen account and associated draft records have been permanently erased under the DPDP Act 2023.'
     })
   } catch (error) {
     next(error)

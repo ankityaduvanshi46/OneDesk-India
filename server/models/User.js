@@ -98,6 +98,14 @@ const userSchema = new mongoose.Schema(
     },
     lastLoginAt: {
       type: Date
+    },
+    consentGivenAt: {
+      type: Date,
+      default: Date.now
+    },
+    consentVersion: {
+      type: String,
+      default: 'DPDP-2023-v1'
     }
   },
   {
