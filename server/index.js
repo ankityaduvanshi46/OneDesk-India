@@ -76,7 +76,28 @@ app.use(
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-app.use(mongoSanitize())
+
+// Safe in-place NoSQL injection sanitizer compatible with Vercel serverless IncomingMessage
+app.use((req, res, next) => {
+  const sanitizeInPlace = (obj) => {
+    if (!obj || typeof obj !== 'object') return
+    try {
+      Object.keys(obj).forEach((key) => {
+        if (key.startsWith('$') || key.includes('.')) {
+          delete obj[key]
+        } else if (typeof obj[key] === 'object') {
+          sanitizeInPlace(obj[key])
+        }
+      })
+    } catch {
+      // Ignore frozen or non-configurable properties
+    }
+  }
+  if (req.body) sanitizeInPlace(req.body)
+  if (req.params) sanitizeInPlace(req.params)
+  if (req.query) sanitizeInPlace(req.query)
+  next()
+})
 
 app.use('/api', apiLimiter)
 
