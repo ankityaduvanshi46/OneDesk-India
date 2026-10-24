@@ -35,7 +35,7 @@ export default function ScamCheckPage() {
     const cleanNotes = sanitizeInput(reportNotes)
     const mailSubject = encodeURIComponent(`[OneDesk India] Broken/Wrong Link Report: ${cleanUrl}`)
     const mailBody = encodeURIComponent(`URL: ${cleanUrl}\nIssue Type: ${reportIssue}\nNotes: ${cleanNotes}`)
-    window.location.href = `mailto:report@sarkarisevahub.in?subject=${mailSubject}&body=${mailBody}`
+    window.location.href = `mailto:report@onedesk.in?subject=${mailSubject}&body=${mailBody}`
     setSubmitted(true)
     toast.success('Opening your email client to submit report!')
   }

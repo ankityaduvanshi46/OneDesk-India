@@ -80,7 +80,7 @@ export function debounce(fn, delay) {
 }
 
 export function generateShareUrl(serviceId) {
-  return `${window.location.origin}/service/${serviceId}`
+  return `${window.location.origin}/services/${serviceId}`
 }
 
 export function generateWhatsAppUrl(text) {

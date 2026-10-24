@@ -8,7 +8,7 @@ import Logo from '../components/Logo'
 
 export default function VerifyDocumentPage() {
   const [searchParams] = useSearchParams()
-  const initialId = searchParams.get('id') || ''
+  const initialId = searchParams.get('id') || searchParams.get('ref') || ''
 
   const [verificationId, setVerificationId] = useState(initialId)
   const [loading, setLoading] = useState(false)

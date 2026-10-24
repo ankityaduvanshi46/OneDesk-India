@@ -174,7 +174,7 @@ export default function ServiceCard({ service, index = 0 }) {
 
   const handleCopyLink = async (e) => {
     e.stopPropagation()
-    const url = `${window.location.origin}/service/${service.id}`
+    const url = `${window.location.origin}/services/${service.id}`
     try {
       await navigator.clipboard.writeText(url)
       toast.success(t('detail.linkCopied') || 'Link copied to clipboard')
@@ -186,7 +186,7 @@ export default function ServiceCard({ service, index = 0 }) {
 
   const handleWhatsApp = (e) => {
     e.stopPropagation()
-    const text = `Access ${service.name} on OneDesk India: ${window.location.origin}/service/${service.id}`
+    const text = `Access ${service.name} on OneDesk India: ${window.location.origin}/services/${service.id}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
     setShowShareMenu(false)
   }

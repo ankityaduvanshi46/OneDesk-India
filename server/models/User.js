@@ -36,9 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     govIdHash: {
       type: String,
-      unique: true,
-      sparse: true,
-      index: true
+      sparse: true
     },
     govIdType: {
       type: String,

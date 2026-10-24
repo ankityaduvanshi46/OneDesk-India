@@ -66,7 +66,7 @@ export default function ServiceDetailPage() {
 
   // Find related citizen guide from our published articles
   const relatedGuide = PUBLISHED_BLOG_ARTICLES.find(
-    (g) => g.relatedServiceId === service.id || g.category.toLowerCase() === service.category.toLowerCase()
+    (g) => g.relatedServiceId === service.id || (g.category && service.category && g.category.toLowerCase() === service.category.toLowerCase())
   )
 
   const toggleDocCheck = (doc) => {
@@ -513,7 +513,7 @@ export default function ServiceDetailPage() {
         <section className="space-y-4">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <span>🔗</span>
-            <span>{t('detail.relatedServices')}</span>
+            <span>{t('detail.relatedServices') || 'Related Civic Portals'}</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {relatedServices.map((rel, index) => (

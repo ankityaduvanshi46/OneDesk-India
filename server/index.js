@@ -33,6 +33,7 @@ await connectDB()
 
 async function bootstrapAdmin() {
   try {
+    if (!isDBConnected()) return
     const adminEmail = (process.env.ADMIN_BOOTSTRAP_EMAIL || 'admin@onedesk.in').toLowerCase()
     const existing = await User.findOne({ email: adminEmail })
     if (!existing) {

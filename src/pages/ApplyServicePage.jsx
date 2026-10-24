@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { api } from '../services/api'
-import { STATES } from '../data/services'
+import { STATES, services as ALL_SERVICES } from '../data/services'
 import { trackApplyClick } from '../utils/analytics'
 
 const POPULAR_SERVICES = [
@@ -40,9 +40,23 @@ export default function ApplyServicePage() {
   const { user, isAuthenticated, loading: authLoading } = useAuthStore()
 
   const [step, setStep] = useState(1)
-  const [selectedService, setSelectedService] = useState(
-    POPULAR_SERVICES.find((s) => s.id === initialServiceId) || POPULAR_SERVICES[0]
-  )
+  const [selectedService, setSelectedService] = useState(() => {
+    if (initialServiceId) {
+      const popular = POPULAR_SERVICES.find((s) => s.id === initialServiceId)
+      if (popular) return popular
+      const dirService = ALL_SERVICES.find((s) => s.id === initialServiceId)
+      if (dirService) {
+        return {
+          id: dirService.id,
+          name: dirService.name,
+          category: dirService.category || 'General',
+          fee: dirService.fees || 'Statutory Fee / Varies',
+          time: dirService.time || 'Standard turnaround'
+        }
+      }
+    }
+    return POPULAR_SERVICES[0]
+  })
   const [selectedState, setSelectedState] = useState(user?.address?.state || 'Uttar Pradesh')
 
   const [personalDetails, setPersonalDetails] = useState({
@@ -83,7 +97,8 @@ export default function ApplyServicePage() {
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast('Please log in or register to submit a service application.', { icon: '🔒' })
-      navigate('/login')
+      const safeTarget = window.location.pathname + window.location.search
+      navigate(`/login?returnUrl=${encodeURIComponent(safeTarget)}`)
     }
   }, [isAuthenticated, authLoading, navigate])
 
@@ -247,6 +262,25 @@ export default function ApplyServicePage() {
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {!POPULAR_SERVICES.some((s) => s.id === selectedService.id) && (
+                  <div className="p-4 rounded-xl border border-gold-500 bg-gold-500/10 dark:bg-royal-800 shadow-sm col-span-1 sm:col-span-2">
+                    <div className="flex items-start justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-saffron">
+                        {selectedService.category || 'Selected Service'}
+                      </span>
+                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        {selectedService.fee}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white mt-1">
+                      {selectedService.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mt-2">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{selectedService.time}</span>
+                    </div>
+                  </div>
+                )}
                 {POPULAR_SERVICES.map((serv) => (
                   <div
                     key={serv.id}

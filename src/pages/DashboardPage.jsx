@@ -394,7 +394,7 @@ export default function DashboardPage() {
                     {selectedApp.history.map((h, i) => (
                       <div key={i} className="text-[11px] space-y-0.5">
                         <div className="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
-                          {h.status.replace('_', ' ')}
+                          {h.status ? h.status.replace('_', ' ') : 'STATUS UPDATE'}
                         </div>
                         <div className="text-gray-400">
                           {new Date(h.timestamp).toLocaleString('en-IN')} by {h.updatedBy} ({h.role})

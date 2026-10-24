@@ -76,9 +76,9 @@ router.post('/register', authLimiter, validateBody(registerSchema), async (req, 
 
     let govHash = null
     let govMask = null
-    if (govIdNumber) {
-      govHash = hashGovId(govIdNumber)
-      govMask = maskGovId(govIdNumber)
+    if (govIdNumber && govIdNumber.trim()) {
+      govHash = hashGovId(govIdNumber.trim())
+      govMask = maskGovId(govIdNumber.trim())
 
       const existingGovId = await User.findOne({ govIdHash: govHash })
       if (existingGovId) {
@@ -98,14 +98,11 @@ router.post('/register', authLimiter, validateBody(registerSchema), async (req, 
       duplicateCheck = await User.findOne({ registerId })
     }
 
-    const newUser = new User({
+    const userData = {
       registerId,
       name: name.trim(),
       email: cleanEmail,
       mobile: cleanMobile,
-      govIdHash: govHash,
-      govIdMasked: govMask,
-      govIdType,
       passwordHash: password,
       role: 'user',
       consentGivenAt: new Date(),
@@ -114,8 +111,15 @@ router.post('/register', authLimiter, validateBody(registerSchema), async (req, 
         state: state || '',
         city: city || ''
       }
-    })
+    }
 
+    if (govHash) {
+      userData.govIdHash = govHash
+      userData.govIdMasked = govMask
+      userData.govIdType = govIdType
+    }
+
+    const newUser = new User(userData)
     await newUser.save()
 
     const otpCode = generateOTP(6)
@@ -129,12 +133,16 @@ router.post('/register', authLimiter, validateBody(registerSchema), async (req, 
       expiresAt
     })
 
-    await sendOtpEmail({
-      email: cleanEmail,
-      name: newUser.name,
-      code: otpCode,
-      type: 'email_verification'
-    })
+    try {
+      await sendOtpEmail({
+        email: cleanEmail,
+        name: newUser.name,
+        code: otpCode,
+        type: 'email_verification'
+      })
+    } catch (mailError) {
+      console.warn('[Registration] Could not dispatch OTP email via SMTP:', mailError.message)
+    }
 
     await AuditLog.create({
       userId: newUser._id,
@@ -257,12 +265,16 @@ router.post('/resend-otp', otpLimiter, validateBody(resendOtpSchema), async (req
       expiresAt
     })
 
-    await sendOtpEmail({
-      email: cleanEmail,
-      name: user.name,
-      code: otpCode,
-      type
-    })
+    try {
+      await sendOtpEmail({
+        email: cleanEmail,
+        name: user.name,
+        code: otpCode,
+        type
+      })
+    } catch (mailError) {
+      console.warn('[ResendOTP] Could not dispatch OTP email via SMTP:', mailError.message)
+    }
 
     res.json({
       success: true,
@@ -506,12 +518,16 @@ router.post('/forgot-password', authLimiter, async (req, res, next) => {
       expiresAt
     })
 
-    await sendOtpEmail({
-      email: user.email,
-      name: user.name,
-      code: otpCode,
-      type: 'password_reset'
-    })
+    try {
+      await sendOtpEmail({
+        email: user.email,
+        name: user.name,
+        code: otpCode,
+        type: 'password_reset'
+      })
+    } catch (mailError) {
+      console.warn('[ForgotPassword] Could not dispatch email via SMTP:', mailError.message)
+    }
 
     res.json({
       success: true,
