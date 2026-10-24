@@ -16,6 +16,9 @@ import notificationRoutes from './routes/notificationRoutes.js'
 import ticketRoutes from './routes/ticketRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import serviceRoutes from './routes/serviceRoutes.js'
+import paymentRoutes from './routes/paymentRoutes.js'
+import cronRoutes from './routes/cronRoutes.js'
+import feedbackRoutes from './routes/feedbackRoutes.js'
 import { generateRegisterId } from './utils/idGenerator.js'
 
 dotenv.config()
@@ -97,6 +100,9 @@ app.use('/api/notifications', notificationRoutes)
 app.use('/api/tickets', ticketRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/services', serviceRoutes)
+app.use('/api/payments', paymentRoutes)
+app.use('/api/cron', cronRoutes)
+app.use('/api/feedback', feedbackRoutes)
 
 app.use(errorHandler)
 

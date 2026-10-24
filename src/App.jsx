@@ -28,6 +28,7 @@ const VerifyDocumentPage = lazy(() => import('./pages/VerifyDocumentPage'))
 const SupportPage = lazy(() => import('./pages/SupportPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
+const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage'))
 
 export default function App() {
   const { initTheme, theme, fontSize } = useAppStore()
@@ -84,6 +85,7 @@ export default function App() {
               <Route path="/support" element={<SupportPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/refund-policy" element={<RefundPolicyPage />} />
 
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

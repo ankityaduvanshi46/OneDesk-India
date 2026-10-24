@@ -102,5 +102,17 @@ export const api = {
       return request(`/services${qs ? `?${qs}` : ''}`)
     },
     getOne: (serviceId) => request(`/services/${serviceId}`)
+  },
+  payments: {
+    createOrder: (payload) => request('/payments/create-order', { method: 'POST', body: JSON.stringify(payload) }),
+    verifySignature: (payload) => request('/payments/verify-signature', { method: 'POST', body: JSON.stringify(payload) }),
+    getMy: () => request('/payments/my')
+  },
+  feedback: {
+    submit: (payload) => request('/feedback', { method: 'POST', body: JSON.stringify(payload) }),
+    getPublic: (params = {}) => {
+      const qs = new URLSearchParams(params).toString()
+      return request(`/feedback${qs ? `?${qs}` : ''}`)
+    }
   }
 }

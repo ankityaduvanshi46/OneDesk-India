@@ -45,8 +45,23 @@ export default function Footer() {
             <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">Safety & Trust</h3>
             <ul className="space-y-2">
               <li>
+                <Link to="/verify-document" className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand-primary transition-colors">
+                  🔍 Verify Document (QR)
+                </Link>
+              </li>
+              <li>
                 <Link to="/scam-check" className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand-primary transition-colors">
                   🛡️ {t('nav.scamCheck')}
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand-primary transition-colors">
+                  🔄 Refund & Fee Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/support" className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand-primary transition-colors">
+                  🎧 Citizen Helpdesk
                 </Link>
               </li>
               <li>
