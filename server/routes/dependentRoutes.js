@@ -5,7 +5,7 @@ import { Dependent } from '../models/Dependent.js'
 import { Application } from '../models/Application.js'
 import { Document } from '../models/Document.js'
 import { authenticate } from '../middleware/auth.js'
-import { validateBody } from '../middleware/validator.js'
+import { validateBody } from '../middleware/validate.js'
 
 const router = express.Router()
 
