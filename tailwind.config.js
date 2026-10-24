@@ -8,7 +8,7 @@ export default {
         india: { green: '#138808', white: '#ffffff', saffron: '#FF9933', blue: '#000080', navy: '#0F1B5E' },
         brand: { primary: '#FF6B35', secondary: '#1B4FD8', accent: '#138808', muted: '#6B7280' },
         gold: { 50: '#fffdf5', 100: '#fef9e7', 200: '#fcf0c3', 300: '#f9e396', 400: '#f5d15a', 500: '#D4AF37', 600: '#B8860B', 700: '#996515', 800: '#7B4A12', 900: '#5E340E' },
-        royal: { 900: '#070B19', 850: '#0B132B', 800: '#101B3B', 700: '#1C2541', 600: '#2A3663' }
+        royal: { 950: '#030712', 900: '#070B19', 850: '#0B132B', 800: '#101B3B', 750: '#161F38', 700: '#1C2541', 600: '#2A3663' }
       },
       fontFamily: {
         sans: ['Inter', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],

@@ -73,55 +73,55 @@ export default function LoginPage() {
         className="w-full max-w-5xl luxury-glass rounded-3xl overflow-hidden border border-gray-100 dark:border-royal-750 shadow-luxury grid grid-cols-1 lg:grid-cols-12"
       >
         {/* Left Side: Imperial Republic Brand Showcase (Visible on lg+) */}
-        <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-royal-950 via-royal-900 to-royal-850 p-10 text-white flex-col justify-between relative overflow-hidden border-r border-royal-800">
+        <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/40 dark:from-royal-950 dark:via-royal-900 dark:to-royal-850 p-10 text-gray-900 dark:text-white flex-col justify-between relative overflow-hidden border-r border-gray-200 dark:border-royal-800">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="space-y-6 relative z-10">
             <Logo size="md" />
 
             <div className="pt-4 space-y-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-gold-400 bg-gold-500/20 px-2.5 py-0.5 rounded-full border border-gold-500/30">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-900 dark:text-gold-300 bg-amber-100 dark:bg-gold-500/20 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-gold-500/30">
                 Single-Window Citizen Desk
               </span>
-              <h2 className="text-2xl font-extrabold tracking-tight">
+              <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
                 Welcome to OneDesk Digital Gateway
               </h2>
-              <p className="text-xs text-gray-300 leading-relaxed">
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                 Log in to securely track government applications, access verified certificates, and manage your digital locker.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-royal-800/60 border border-gold-500/30 flex items-center gap-4">
-              <div className="p-2 rounded-xl bg-royal-900 shrink-0">
+            <div className="p-4 rounded-2xl bg-white/90 dark:bg-royal-800/60 border border-gray-200 dark:border-gold-500/30 shadow-sm flex items-center gap-4">
+              <div className="p-2 rounded-xl bg-gray-50 dark:bg-royal-900 border border-gray-100 dark:border-royal-700 shrink-0">
                 <IdentityIllustration className="w-12 h-12" />
               </div>
               <div className="text-xs">
-                <div className="font-bold text-gold-300">Strict Data Isolation</div>
-                <div className="text-[11px] text-gray-300 mt-0.5">
+                <div className="font-bold text-gray-900 dark:text-gold-300">Strict Data Isolation</div>
+                <div className="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5 font-medium">
                   One-Citizen-One-Account verified by cryptographic hashing.
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2.5 text-xs text-gray-300 pt-2">
+            <div className="space-y-2.5 text-xs text-gray-800 dark:text-gray-200 font-medium pt-2">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>256-Bit SSL Encrypted Vault</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>Zero Cold Calls or Unsolicited Marketing</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>Direct Links to 80+ Official Portals</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-6 border-t border-royal-800 text-[11px] text-gray-400 relative z-10 flex items-center justify-between">
+          <div className="pt-6 border-t border-gray-200 dark:border-royal-800 text-[11px] text-gray-700 dark:text-gray-400 font-semibold relative z-10 flex items-center justify-between">
             <span>DPDP Act 2023 Compliant</span>
-            <span className="text-gold-400">Ver. 2.0</span>
+            <span className="text-saffron-700 dark:text-gold-400 font-bold">Ver. 2.0</span>
           </div>
         </div>
 
@@ -132,14 +132,14 @@ export default function LoginPage() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Citizen Portal Sign In
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
                 Enter your credentials to continue to your dashboard.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-200 mb-1.5">
                   Email, Mobile, or Citizen ID
                 </label>
                 <div className="relative">
@@ -159,7 +159,7 @@ export default function LoginPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-200">
                     Password
                   </label>
                 </div>
@@ -202,7 +202,7 @@ export default function LoginPage() {
             </form>
 
             <div className="pt-4 border-t border-gray-100 dark:border-royal-750 text-center space-y-3">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
                 Don't have an official OneDesk account?{' '}
                 <Link
                   to={searchParams.get('returnUrl') ? `/register?returnUrl=${encodeURIComponent(searchParams.get('returnUrl'))}` : '/register'}
@@ -212,7 +212,7 @@ export default function LoginPage() {
                 </Link>
               </p>
 
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                 <span>256-bit SSL Cryptographic Data Isolation</span>
               </div>
