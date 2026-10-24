@@ -5,10 +5,8 @@ const userSchema = new mongoose.Schema(
   {
     registerId: {
       type: String,
-      unique: true,
       required: true,
-      trim: true,
-      index: true
+      trim: true
     },
     name: {
       type: String,
@@ -20,23 +18,18 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email address is required'],
-      unique: true,
       lowercase: true,
       trim: true,
-      index: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
     },
     mobile: {
       type: String,
       required: [true, 'Mobile number is required'],
-      unique: true,
       trim: true,
-      index: true,
       match: [/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number']
     },
     govIdHash: {
-      type: String,
-      sparse: true
+      type: String
     },
     govIdType: {
       type: String,
