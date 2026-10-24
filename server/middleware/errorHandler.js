@@ -1,5 +1,20 @@
+import { ZodError } from 'zod'
+
 export function errorHandler(err, req, res, next) {
   console.error('[Error Handler]', err)
+
+  if (err instanceof ZodError) {
+    const formattedErrors = err.errors.map((e) => ({
+      field: e.path.join('.'),
+      message: e.message
+    }))
+    return res.status(400).json({
+      success: false,
+      code: 'VALIDATION_ERROR',
+      message: formattedErrors[0]?.message || 'Input validation failed. Please check the submitted fields.',
+      errors: formattedErrors
+    })
+  }
 
   if (err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {

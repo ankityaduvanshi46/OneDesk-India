@@ -98,24 +98,28 @@ app.use('/api/admin', adminRoutes)
 
 app.use(errorHandler)
 
-const server = app.listen(PORT, () => {
-  console.log(`[OneDesk India API] Server listening on port ${PORT} (Environment: ${process.env.NODE_ENV || 'development'})`)
-})
+let server
 
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received. Commencing graceful shutdown...')
-  server.close(async () => {
-    await disconnectDB()
-    process.exit(0)
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`[OneDesk India API] Server listening on port ${PORT} (Environment: ${process.env.NODE_ENV || 'development'})`)
   })
-})
 
-process.on('SIGINT', async () => {
-  console.log('SIGINT signal received. Commencing graceful shutdown...')
-  server.close(async () => {
-    await disconnectDB()
-    process.exit(0)
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM signal received. Commencing graceful shutdown...')
+    server.close(async () => {
+      await disconnectDB()
+      process.exit(0)
+    })
   })
-})
+
+  process.on('SIGINT', async () => {
+    console.log('SIGINT signal received. Commencing graceful shutdown...')
+    server.close(async () => {
+      await disconnectDB()
+      process.exit(0)
+    })
+  })
+}
 
 export default app
