@@ -49,6 +49,17 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    dependentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Dependent',
+      default: null,
+      index: true
+    },
+    isForDependent: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
     formData: {
       type: mongoose.Schema.Types.Mixed,
       default: {}

@@ -120,5 +120,12 @@ export const api = {
       const qs = new URLSearchParams(params).toString()
       return request(`/feedback${qs ? `?${qs}` : ''}`)
     }
+  },
+  dependents: {
+    getAll: () => request('/dependents'),
+    getById: (id) => request(`/dependents/${id}`),
+    create: (payload) => request('/dependents', { method: 'POST', body: JSON.stringify(payload) }),
+    update: (id, payload) => request(`/dependents/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+    delete: (id) => request(`/dependents/${id}`, { method: 'DELETE' })
   }
 }

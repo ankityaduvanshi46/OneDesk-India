@@ -28,6 +28,7 @@ const MyDocumentsPage = lazy(() => import('./pages/MyDocumentsPage'))
 const VerifyDocumentPage = lazy(() => import('./pages/VerifyDocumentPage'))
 const SupportPage = lazy(() => import('./pages/SupportPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const DependentProfilesPage = lazy(() => import('./pages/DependentProfilesPage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage'))
 const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage'))
@@ -122,6 +123,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/family-profiles"
+                element={
+                  <ProtectedRoute>
+                    <DependentProfilesPage />
                   </ProtectedRoute>
                 }
               />

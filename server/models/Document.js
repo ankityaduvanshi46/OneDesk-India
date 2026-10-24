@@ -27,6 +27,12 @@ const documentSchema = new mongoose.Schema(
       default: null,
       index: true
     },
+    dependentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Dependent',
+      default: null,
+      index: true
+    },
     serviceId: {
       type: String,
       default: 'locker'

@@ -1,5 +1,6 @@
 import express from 'express'
 import { Application } from '../models/Application.js'
+import { Dependent } from '../models/Dependent.js'
 import { Notification } from '../models/Notification.js'
 import { AuditLog } from '../models/AuditLog.js'
 import { generateApplicationNo } from '../utils/idGenerator.js'
@@ -56,13 +57,24 @@ router.post('/upload-file', authenticate, upload.single('file'), async (req, res
 
 router.post('/apply', authenticate, async (req, res, next) => {
   try {
-    const { serviceId, serviceName, formData = {}, uploadedFiles = [] } = req.body
+    const { serviceId, serviceName, formData = {}, uploadedFiles = [], dependentId } = req.body
 
     if (!serviceId || !serviceName) {
       return res.status(400).json({
         success: false,
         message: 'Service identifier and Service Name are required.'
       })
+    }
+
+    // If a dependentId is supplied, verify it belongs to this citizen (IDOR guard)
+    if (dependentId) {
+      const dep = await Dependent.findOne({ _id: dependentId, userId: req.user._id, status: 'active' })
+      if (!dep) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or inaccessible dependent profile.'
+        })
+      }
     }
 
     let applicationNo = generateApplicationNo('ODI')
@@ -79,6 +91,8 @@ router.post('/apply', authenticate, async (req, res, next) => {
       serviceName,
       formData,
       uploadedFiles,
+      dependentId: dependentId || null,
+      isForDependent: !!dependentId,
       status: 'submitted',
       history: [
         {

@@ -19,6 +19,7 @@ import serviceRoutes from './routes/serviceRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js'
 import cronRoutes from './routes/cronRoutes.js'
 import feedbackRoutes from './routes/feedbackRoutes.js'
+import dependentRoutes from './routes/dependentRoutes.js'
 import { generateRegisterId } from './utils/idGenerator.js'
 
 dotenv.config()
@@ -124,6 +125,7 @@ app.use('/api/services', serviceRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/cron', cronRoutes)
 app.use('/api/feedback', feedbackRoutes)
+app.use('/api/dependents', dependentRoutes)
 
 app.use(errorHandler)
 

@@ -13,6 +13,7 @@ import {
   ExternalLink,
   ShieldCheck,
   User,
+  Users,
   QrCode,
   LifeBuoy
 } from 'lucide-react'
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, ready: 0, rejected: 0 })
   const [applications, setApplications] = useState([])
   const [documents, setDocuments] = useState([])
+  const [dependents, setDependents] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedApp, setSelectedApp] = useState(null)
 
@@ -43,15 +45,17 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true)
-      const [statsRes, appsRes, docsRes] = await Promise.all([
+      const [statsRes, appsRes, docsRes, depRes] = await Promise.all([
         api.applications.getStats().catch(() => ({ stats: {} })),
         api.applications.getMy({ limit: 10 }).catch(() => ({ applications: [] })),
-        api.documents.getMy().catch(() => ({ documents: [] }))
+        api.documents.getMy().catch(() => ({ documents: [] })),
+        api.dependents.getAll().catch(() => ({ dependents: [] }))
       ])
 
       if (statsRes.stats) setStats(statsRes.stats)
       if (appsRes.applications) setApplications(appsRes.applications)
       if (docsRes.documents) setDocuments(docsRes.documents)
+      if (depRes.dependents) setDependents(depRes.dependents)
     } catch (err) {
       toast.error('Failed to load dashboard records.')
     } finally {
@@ -291,6 +295,45 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
+
+          {/* Family Profiles Card */}
+          <div className="bg-white dark:bg-royal-850 p-5 rounded-2xl border border-gray-100 dark:border-royal-700 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-amber-500" />
+                <h3 className="font-bold text-sm text-gray-900 dark:text-white">Family Profiles</h3>
+              </div>
+              <Link to="/family-profiles" className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">
+                Manage ({dependents.length})
+              </Link>
+            </div>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+              Link family members to apply for certificates, licences, and pensions on their behalf under one secure account.
+            </p>
+            {dependents.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {dependents.slice(0, 3).map((dep) => (
+                  <span
+                    key={dep._id}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border border-amber-200/50 dark:border-amber-700/50"
+                  >
+                    <span className="font-medium">{dep.name}</span>
+                    <span className="text-[10px] opacity-75 capitalize">({dep.relationship})</span>
+                  </span>
+                ))}
+                {dependents.length > 3 && (
+                  <span className="text-xs text-gray-400 self-center">+{dependents.length - 3} more</span>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/family-profiles"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+              >
+                + Add Family Member
+              </Link>
+            )}
+          </div>
 
           <div className="bg-gradient-to-br from-royal-850 to-royal-900 text-white rounded-2xl p-5 border border-royal-700 space-y-3">
             <div className="flex items-center gap-2">

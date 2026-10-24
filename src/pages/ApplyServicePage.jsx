@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   AlertCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Users
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { api } from '../services/api'
@@ -67,6 +68,16 @@ export default function ApplyServicePage() {
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [dependents, setDependents] = useState([])
+  const [selectedDependentId, setSelectedDependentId] = useState('')
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      api.dependents.getAll().then((res) => {
+        if (res?.dependents) setDependents(res.dependents)
+      }).catch(() => {})
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -120,6 +131,31 @@ export default function ApplyServicePage() {
     }
   }
 
+  const handleDependentChange = (depId) => {
+    setSelectedDependentId(depId)
+    if (!depId) {
+      // Revert to citizen's own profile
+      setPersonalDetails((prev) => ({
+        ...prev,
+        name: user?.name || '',
+        gender: 'male',
+        dob: '',
+        govIdMasked: user?.govIdMasked || ''
+      }))
+    } else {
+      const dep = dependents.find((d) => d._id === depId)
+      if (dep) {
+        setPersonalDetails((prev) => ({
+          ...prev,
+          name: dep.name,
+          gender: dep.gender || 'other',
+          dob: dep.dateOfBirth ? dep.dateOfBirth.slice(0, 10) : '',
+          govIdMasked: dep.govIdMasked || ''
+        }))
+      }
+    }
+  }
+
   const handleSubmitApplication = async () => {
     try {
       setSubmitting(true)
@@ -132,7 +168,8 @@ export default function ApplyServicePage() {
           ...personalDetails,
           ...serviceFields
         },
-        uploadedFiles
+        uploadedFiles,
+        ...(selectedDependentId ? { dependentId: selectedDependentId } : {})
       }
 
       const res = await api.applications.apply(payload)
@@ -283,6 +320,52 @@ export default function ApplyServicePage() {
                   <ShieldCheck className="w-4 h-4" />
                   <span>Profile Auto-Filled</span>
                 </span>
+              </div>
+
+              {/* Who is applying: Self or Family Member */}
+              <div className="p-4 bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/30 rounded-2xl">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-amber-500" />
+                    Who is this application for?
+                  </span>
+                  <a
+                    href="/family-profiles"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    + Manage Family Profiles
+                  </a>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDependentChange('')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                      !selectedDependentId
+                        ? 'bg-amber-500 text-white shadow-sm'
+                        : 'bg-white dark:bg-royal-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-royal-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    👤 Myself ({user?.name || 'Self'})
+                  </button>
+                  {dependents.map((dep) => (
+                    <button
+                      key={dep._id}
+                      type="button"
+                      onClick={() => handleDependentChange(dep._id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                        selectedDependentId === dep._id
+                          ? 'bg-amber-500 text-white shadow-sm'
+                          : 'bg-white dark:bg-royal-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-royal-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{dep.name}</span>
+                      <span className="text-[10px] opacity-75 capitalize">({dep.relationship})</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

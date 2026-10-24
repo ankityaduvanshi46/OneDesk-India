@@ -11,6 +11,7 @@ import {
   PlusCircle,
   LifeBuoy,
   Award,
+  Users,
   Menu,
   X,
   ChevronDown,
@@ -384,6 +385,15 @@ export default function Navbar() {
                       </Link>
 
                       <Link
+                        to="/family-profiles"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-royal-800"
+                      >
+                        <Users className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Family Profiles</span>
+                      </Link>
+
+                      <Link
                         to="/support"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-royal-800"
@@ -586,6 +596,13 @@ export default function Navbar() {
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
                         📂 Digital Document Locker
+                      </Link>
+                      <Link
+                        to="/family-profiles"
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
+                      >
+                        👨‍👩‍👧 Family Profiles
                       </Link>
                       <Link
                         to="/support"
