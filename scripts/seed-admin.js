@@ -21,8 +21,7 @@ async function seedSuperAdmin() {
 
     if (user) {
       console.log(`[Seed] Existing account found for ${adminEmail}. Elevating to Super Admin & updating credentials...`)
-      const salt = await bcrypt.genSalt(12)
-      user.passwordHash = await bcrypt.hash(rawPassword, salt)
+      user.passwordHash = rawPassword
       user.role = 'super_admin'
       user.status = 'active'
       user.isEmailVerified = true
@@ -32,15 +31,13 @@ async function seedSuperAdmin() {
       console.log(`[Seed] Successfully elevated ${adminEmail} to super_admin.`)
     } else {
       const registerId = generateRegisterId()
-      const salt = await bcrypt.genSalt(12)
-      const passwordHash = await bcrypt.hash(rawPassword, salt)
 
       user = new User({
         registerId,
         name: adminName,
         email: adminEmail,
         mobile,
-        passwordHash,
+        passwordHash: rawPassword,
         role: 'super_admin',
         isEmailVerified: true,
         isMobileVerified: true,

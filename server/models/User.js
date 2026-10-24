@@ -116,11 +116,10 @@ userSchema.index({ mobile: 1 }, { unique: true })
 userSchema.index({ registerId: 1 }, { unique: true })
 userSchema.index({ govIdHash: 1 }, { unique: true, sparse: true })
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('passwordHash')) return next()
+userSchema.pre('save', async function () {
+  if (!this.isModified('passwordHash')) return
   const salt = await bcrypt.genSalt(12)
   this.passwordHash = await bcrypt.hash(this.passwordHash, salt)
-  next()
 })
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
