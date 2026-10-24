@@ -1,0 +1,83 @@
+import mongoose from 'mongoose'
+
+const documentSchema = new mongoose.Schema(
+  {
+    documentNo: {
+      type: String,
+      unique: true,
+      required: true,
+      index: true
+    },
+    verificationId: {
+      type: String,
+      unique: true,
+      required: true,
+      index: true
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true
+    },
+    applicationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Application',
+      required: true,
+      index: true
+    },
+    serviceId: {
+      type: String,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    fileName: {
+      type: String,
+      required: true
+    },
+    fileUrl: {
+      type: String,
+      required: true
+    },
+    mimeType: {
+      type: String,
+      default: 'application/pdf'
+    },
+    fileSizeBytes: {
+      type: Number,
+      default: 0
+    },
+    qrCodeData: {
+      type: String,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['active', 'revoked', 'expired'],
+      default: 'active',
+      index: true
+    },
+    issuedAt: {
+      type: Date,
+      default: Date.now
+    },
+    expiresAt: {
+      type: Date
+    },
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    }
+  },
+  {
+    timestamps: true
+  }
+)
+
+documentSchema.index({ userId: 1, createdAt: -1 })
+documentSchema.index({ verificationId: 1 }, { unique: true })
+
+export const Document = mongoose.model('Document', documentSchema)

@@ -1,46 +1,45 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { useAppStore } from '../store/useAppStore'
-
-const NAV_ITEMS = [
-  { to: '/', icon: '🏠', key: 'home', exact: true },
-  { to: '/services', icon: '📋', key: 'services' },
-  { to: '/wizard', icon: '🧭', key: 'wizard' },
-  { to: '/favourites', icon: '❤️', key: 'favourites' },
-  { to: '/quick-links', icon: '⚡', key: 'quickLinks' }
-]
+import { useAuthStore } from '../store/useAuthStore'
 
 export default function BottomNav() {
-  const { t } = useTranslation()
   const location = useLocation()
+  const { isAuthenticated } = useAuthStore()
+
+  const items = [
+    { to: '/', icon: '🏛️', label: 'Home', exact: true },
+    { to: '/services', icon: '📋', label: 'Services' },
+    { to: '/apply', icon: '✨', label: 'Apply' },
+    { to: isAuthenticated ? '/dashboard' : '/login', icon: isAuthenticated ? '👤' : '🔑', label: isAuthenticated ? 'Dashboard' : 'Sign In' },
+    { to: '/verify-document', icon: '🛡️', label: 'Verify' }
+  ]
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-area-inset-bottom"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-royal-900/95 backdrop-blur-md border-t border-gray-200 dark:border-royal-800 safe-area-inset-bottom"
       aria-label="Mobile navigation"
     >
       <div className="flex items-stretch h-16">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const isActive = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to)
           return (
             <NavLink
               key={item.to}
               to={item.to}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative"
-              aria-label={t(`nav.${item.key}`)}
+              aria-label={item.label}
             >
               {isActive && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute top-0 inset-x-3 h-0.5 bg-brand-primary rounded-b-full"
+                  className="absolute top-0 inset-x-3 h-0.5 bg-gradient-to-r from-saffron to-gold-500 rounded-b-full"
                 />
               )}
-              <span className={`text-xl transition-all ${isActive ? 'scale-110' : 'opacity-60'}`}>
+              <span className={`text-lg transition-all ${isActive ? 'scale-110' : 'opacity-60'}`}>
                 {item.icon}
               </span>
-              <span className={`text-[10px] font-medium ${isActive ? 'text-brand-primary' : 'text-gray-500 dark:text-gray-400'}`}>
-                {t(`nav.${item.key}`)}
+              <span className={`text-[10px] font-semibold ${isActive ? 'text-saffron' : 'text-gray-500 dark:text-gray-400'}`}>
+                {item.label}
               </span>
             </NavLink>
           )

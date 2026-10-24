@@ -196,13 +196,23 @@ export default function ServiceDetailPage() {
             <span>Verified Official Portal: <code className="font-mono font-bold">{new URL(service.url).hostname}</code></span>
           </div>
 
-          <button
-            onClick={handleOpenOfficial}
-            className="w-full sm:w-auto btn-luxury px-8 py-3 text-sm flex items-center justify-center gap-2 shadow-lg"
-          >
-            <span>{t('serviceCard.openWebsite')}</span>
-            <span>↗</span>
-          </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-col sm:flex-row">
+            <Link
+              to={`/apply?service=${service.id}`}
+              className="w-full sm:w-auto btn-luxury px-6 py-3 text-sm flex items-center justify-center gap-2 shadow-lg"
+            >
+              <span>Apply via OneDesk Hub</span>
+              <span>⚡</span>
+            </Link>
+
+            <button
+              onClick={handleOpenOfficial}
+              className="w-full sm:w-auto btn-luxury-outline px-6 py-3 text-sm flex items-center justify-center gap-2"
+            >
+              <span>{t('serviceCard.openWebsite')}</span>
+              <span>↗</span>
+            </button>
+          </div>
         </div>
 
         <AnimatePresence>
