@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { useAppStore } from '../store/useAppStore'
 import { isValidUrl, isOfficialDomain } from '../utils/helpers'
 import toast from 'react-hot-toast'
@@ -49,10 +49,11 @@ export default function QuickLinksPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <Helmet>
-        <title>{t('quickLinks.title')} – {t('siteName')}</title>
-        <meta name="description" content="Customizable Quick Links dashboard for instant access to your most-used government portals on OneDesk India." />
-      </Helmet>
+      <SEOHead
+        title={t('quickLinks.title')}
+        description="Customizable Quick Links dashboard for instant access to your most-used government portals on OneDesk India."
+        canonical="/quick-links"
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

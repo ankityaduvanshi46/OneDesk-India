@@ -1,17 +1,15 @@
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { Link } from 'react-router-dom'
 import { ShieldCheck, HelpCircle, ArrowLeft, RefreshCw, FileText } from 'lucide-react'
 
 export default function RefundPolicyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-      <Helmet>
-        <title>Refund & Cancellation Policy – OneDesk India</title>
-        <meta
-          name="description"
-          content="Official refund, cancellation, and fee return policies for citizen services facilitated through OneDesk India."
-        />
-      </Helmet>
+      <SEOHead
+        title="Refund & Cancellation Policy"
+        description="Official refund, cancellation, and fee return policies for citizen services facilitated through OneDesk India."
+        canonical="/refund-policy"
+      />
 
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
         <Link to="/" className="hover:text-gold-500 flex items-center gap-1">

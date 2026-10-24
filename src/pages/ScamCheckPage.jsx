@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { checkUrlDomain, sanitizeInput } from '../utils/helpers'
 import { OFFICIAL_DOMAINS } from '../data/services'
 import toast from 'react-hot-toast'
@@ -42,10 +42,11 @@ export default function ScamCheckPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-12">
-      <Helmet>
-        <title>{t('scamCheck.title')} – Spot Fake Government Websites | {t('siteName')}</title>
-        <meta name="description" content="Check any government website URL to verify if it is an authentic .gov.in or .nic.in domain before entering your Aadhaar or PAN." />
-      </Helmet>
+      <SEOHead
+        title="Official Domain & Anti-Phishing Verifier"
+        description="Check any government website URL to verify if it is an authentic .gov.in or .nic.in domain before entering your Aadhaar or PAN."
+        canonical="/scam-check"
+      />
 
       <div className="text-center space-y-3 max-w-xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-semibold">

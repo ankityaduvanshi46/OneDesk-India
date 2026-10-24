@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { ShieldCheck, Search, AlertTriangle, CheckCircle2, QrCode, FileText, Download, Building } from 'lucide-react'
 import { api } from '../services/api'
 import Logo from '../components/Logo'
@@ -50,9 +50,11 @@ export default function VerifyDocumentPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-      <Helmet>
-        <title>Public Document Verification – OneDesk India</title>
-      </Helmet>
+      <SEOHead
+        title="Public Certificate & Document Verification"
+        description="Verify the cryptographic authenticity of any citizen certificate or receipt issued with a OneDesk QR code or verification ID."
+        canonical="/verify-document"
+      />
 
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">

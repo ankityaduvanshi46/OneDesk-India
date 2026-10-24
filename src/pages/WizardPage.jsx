@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { useAppStore } from '../store/useAppStore'
 import ServiceCard from '../components/ServiceCard'
 
@@ -121,10 +121,11 @@ export default function WizardPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <Helmet>
-        <title>What Do I Need? – Guided Assistant | {t('siteName')}</title>
-        <meta name="description" content="Step-by-step smart questionnaire to find the exact Indian government portal and documents you need on OneDesk India." />
-      </Helmet>
+      <SEOHead
+        title="What Do I Need? – Guided Assistant"
+        description="Step-by-step smart questionnaire to find the exact Indian government portal and documents you need on OneDesk India."
+        canonical="/wizard"
+      />
 
       <div className="text-center space-y-3 max-w-xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-600 dark:text-gold-300 text-xs font-semibold border border-gold-500/30">

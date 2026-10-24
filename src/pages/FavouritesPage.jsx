@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import { useAppStore } from '../store/useAppStore'
 import ServiceCard from '../components/ServiceCard'
 
@@ -16,10 +16,11 @@ export default function FavouritesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <Helmet>
-        <title>{t('favourites.title')} – {t('siteName')}</title>
-        <meta name="description" content="Your saved favourite Indian government services on OneDesk India for instant 1-click access." />
-      </Helmet>
+      <SEOHead
+        title="Saved Favourite Portals"
+        description="Your saved favourite Indian government services on OneDesk India for instant 1-click access."
+        canonical="/favourites"
+      />
 
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
