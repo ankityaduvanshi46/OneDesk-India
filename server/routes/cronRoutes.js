@@ -13,8 +13,12 @@ router.get('/reminders', async (req, res, next) => {
     const authHeader = req.headers.authorization
     const cronSecret = process.env.CRON_SECRET
 
+    const isProduction = process.env.NODE_ENV === 'production'
+    const isVercelCron = req.headers['x-vercel-cron'] === '1'
+    const isAuthorizedSecret = !!(cronSecret && authHeader === `Bearer ${cronSecret}`)
+
     // Verify Vercel Cron invocation or secret header
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}` && req.headers['x-vercel-cron'] !== '1') {
+    if (isProduction && !isVercelCron && !isAuthorizedSecret) {
       return res.status(401).json({ success: false, message: 'Unauthorized cron request.' })
     }
 

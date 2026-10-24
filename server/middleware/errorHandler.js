@@ -68,8 +68,11 @@ export function errorHandler(err, req, res, next) {
   }
 
   const statusCode = err.statusCode || 500
+  const isProduction = process.env.NODE_ENV === 'production'
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'An unexpected internal server error occurred. Please try again later.'
+    message: isProduction && statusCode === 500
+      ? 'An unexpected internal server error occurred. Please try again later.'
+      : (err.message || 'An unexpected error occurred.')
   })
 }

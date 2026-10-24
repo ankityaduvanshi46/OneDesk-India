@@ -264,11 +264,34 @@ const resources = {
   }
 }
 
+const getInitialLanguage = () => {
+  if (typeof window === 'undefined') return 'en'
+  try {
+    const raw = localStorage.getItem('onedesk-india-store')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      const lang = parsed?.state?.language
+      if (lang === 'hi' || lang === 'en') {
+        return lang
+      }
+    }
+  } catch {
+    // fallback to English
+  }
+  return 'en'
+}
+
+const initialLang = getInitialLanguage()
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'en',
+  lng: initialLang,
   fallbackLng: 'en',
   interpolation: { escapeValue: false }
 })
+
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = initialLang
+}
 
 export default i18n

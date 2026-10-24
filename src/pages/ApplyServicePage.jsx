@@ -368,7 +368,7 @@ export default function ApplyServicePage() {
                   <a
                     href="/family-profiles"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline"
                   >
                     + Manage Family Profiles

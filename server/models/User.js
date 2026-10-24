@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
     },
     mobile: {
       type: String,
-      required: [true, 'Mobile number is required'],
       trim: true,
       match: [/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number']
     },
@@ -105,7 +104,7 @@ const userSchema = new mongoose.Schema(
 )
 
 userSchema.index({ email: 1 }, { unique: true })
-userSchema.index({ mobile: 1 }, { unique: true })
+userSchema.index({ mobile: 1 }, { unique: true, sparse: true })
 userSchema.index({ registerId: 1 }, { unique: true })
 userSchema.index({ govIdHash: 1 }, { unique: true, sparse: true })
 

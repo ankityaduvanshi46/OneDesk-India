@@ -45,7 +45,7 @@ async function bootstrapAdmin() {
         registerId,
         name: adminName,
         email: adminEmail,
-        mobile: '9876543210',
+        mobile: process.env.ADMIN_BOOTSTRAP_MOBILE || undefined,
         passwordHash: adminPassword,
         role: 'super_admin',
         isEmailVerified: true,

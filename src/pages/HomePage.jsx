@@ -39,14 +39,14 @@ import {
 } from '../components/design-system/ServiceIllustrations'
 
 const SECTOR_SHOWCASE = [
-  { name: 'Identity & Cards', cat: 'identity', comp: IdentityIllustration, count: '12 Portals' },
-  { name: 'Transport & Driving', cat: 'transport', comp: TransportIllustration, count: '14 Portals' },
-  { name: 'Certificates & Revenue', cat: 'certificates', comp: CertificatesIllustration, count: '18 Portals' },
-  { name: 'Tax & Finance', cat: 'taxes', comp: TaxFinanceIllustration, count: '10 Portals' },
-  { name: 'Education & Grants', cat: 'education', comp: EducationIllustration, count: '8 Portals' },
-  { name: 'Healthcare & ABHA', cat: 'health', comp: HealthIllustration, count: '9 Portals' },
-  { name: 'Employment & Shram', cat: 'employment', comp: EmploymentIllustration, count: '7 Portals' },
-  { name: 'Land & Agriculture', cat: 'agriculture', comp: AgricultureIllustration, count: '11 Portals' }
+  { name: 'Identity & Cards', nameHi: 'पहचान एवं कार्ड', cat: 'identity', comp: IdentityIllustration, count: '12 Portals', countHi: '12 पोर्टल' },
+  { name: 'Transport & Driving', nameHi: 'परिवहन एवं ड्राइविंग', cat: 'transport', comp: TransportIllustration, count: '14 Portals', countHi: '14 पोर्टल' },
+  { name: 'Certificates & Revenue', nameHi: 'प्रमाणपत्र एवं राजस्व', cat: 'certificates', comp: CertificatesIllustration, count: '18 Portals', countHi: '18 पोर्टल' },
+  { name: 'Tax & Finance', nameHi: 'कर एवं वित्त', cat: 'taxes', comp: TaxFinanceIllustration, count: '10 Portals', countHi: '10 पोर्टल' },
+  { name: 'Education & Grants', nameHi: 'शिक्षा एवं अनुदान', cat: 'education', comp: EducationIllustration, count: '8 Portals', countHi: '8 पोर्टल' },
+  { name: 'Healthcare & ABHA', nameHi: 'स्वास्थ्य एवं आभा', cat: 'health', comp: HealthIllustration, count: '9 Portals', countHi: '9 पोर्टल' },
+  { name: 'Employment & Shram', nameHi: 'रोजगार एवं श्रम', cat: 'employment', comp: EmploymentIllustration, count: '7 Portals', countHi: '7 पोर्टल' },
+  { name: 'Land & Agriculture', nameHi: 'भूमि एवं कृषि', cat: 'agriculture', comp: AgricultureIllustration, count: '11 Portals', countHi: '11 पोर्टल' }
 ]
 
 const HOW_IT_WORKS_STEPS = [
@@ -176,13 +176,15 @@ export default function HomePage() {
         <section aria-labelledby="sector-showcase-heading" className="space-y-6">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-saffron bg-saffron/10 px-3 py-1 rounded-full border border-saffron/20">
-              Directory Sectors
+              {lang === 'hi' ? 'डायरेक्टरी श्रेणियां' : 'Directory Sectors'}
             </span>
             <h2 id="sector-showcase-heading" className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
-              Explore Government Services by Category
+              {lang === 'hi' ? 'श्रेणी अनुसार सरकारी सेवाएं देखें' : 'Explore Government Services by Category'}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              Curated official gateways across central ministries and all 28 states & 8 union territories.
+              {lang === 'hi'
+                ? 'केंद्रीय मंत्रालयों और सभी 28 राज्यों व 8 केंद्र शासित प्रदेशों के आधिकारिक पोर्टल।'
+                : 'Curated official gateways across central ministries and all 28 states & 8 union territories.'}
             </p>
           </div>
 
@@ -204,10 +206,10 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-[11px] text-gray-900 dark:text-white leading-tight">
-                      {item.name}
+                      {lang === 'hi' && item.nameHi ? item.nameHi : item.name}
                     </h3>
                     <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 block">
-                      {item.count}
+                      {lang === 'hi' && item.countHi ? item.countHi : item.count}
                     </span>
                   </div>
                 </button>
@@ -282,7 +284,7 @@ export default function HomePage() {
                 to="/apply"
                 className="btn-luxury inline-flex items-center gap-2 text-xs sm:text-sm px-8 py-3.5 font-bold shadow-glow-saffron"
               >
-                <span>Start Your Application Now</span>
+                <span>{lang === 'hi' ? 'अभी अपना आवेदन शुरू करें' : 'Start Your Application Now'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -295,10 +297,10 @@ export default function HomePage() {
             <div>
               <h2 id="directory-heading" className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span>🏛️</span>
-                <span>All Government Portals & Facilitation Desks</span>
+                <span>{lang === 'hi' ? 'सभी सरकारी पोर्टल एवं सहायता केंद्र' : 'All Government Portals & Facilitation Desks'}</span>
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {filteredServices.length} {t('search.results')} • Sorted by relevance & state selection
+                {filteredServices.length} {t('search.results')} • {lang === 'hi' ? 'प्रासंगिकता व राज्य अनुसार' : 'Sorted by relevance & state selection'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -307,7 +309,7 @@ export default function HomePage() {
                 className="btn-luxury-outline text-xs py-2 px-3.5 flex items-center gap-1.5"
               >
                 <span>✨</span>
-                <span>Auto-Add Portal</span>
+                <span>{lang === 'hi' ? 'पोर्टल जोड़ें' : 'Auto-Add Portal'}</span>
               </button>
               <StateSelector />
             </div>

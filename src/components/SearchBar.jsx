@@ -9,7 +9,8 @@ import { sanitizeInput, debounce } from '../utils/helpers'
 import { trackSearchQuery } from '../utils/analytics'
 
 export default function SearchBar({ compact = false, autoFocus = false }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const navigate = useNavigate()
   const { recentSearches, addRecentSearch, clearRecentSearches, getAllServices } = useAppStore()
 
@@ -201,7 +202,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
               <div>
                 <div className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center justify-between">
                   <span>{results.length} {t('search.results')}</span>
-                  <span className="text-[10px] text-emerald-500">Live verified</span>
+                  <span className="text-[10px] text-emerald-500">{lang === 'hi' ? 'सत्यापित' : 'Live verified'}</span>
                 </div>
                 {results.map((service, i) => (
                   <button
@@ -214,14 +215,16 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
                     <ServiceAvatar service={service} size="sm" />
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm text-gray-900 dark:text-white truncate flex items-center gap-1.5">
-                        <span>{service.name}</span>
+                        <span>{lang === 'hi' && service.nameHi ? service.nameHi : service.name}</span>
                         {service.isUserAdded && (
                           <span className="text-[9px] px-1 py-0.2 bg-gold-500/20 text-gold-600 dark:text-gold-300 rounded font-bold">
                             Custom
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{service.description}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {lang === 'hi' && service.descriptionHi ? service.descriptionHi : service.description}
+                      </div>
                     </div>
                     {service.verified && <span className="text-emerald-500 text-xs shrink-0 font-bold">✓</span>}
                   </button>
@@ -243,7 +246,9 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
                   <div>
                     <div className="px-4 pt-3 pb-1 flex items-center justify-between">
                       <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('search.recent')}</span>
-                      <button onClick={clearRecentSearches} className="text-xs text-brand-primary hover:underline">Clear</button>
+                      <button onClick={clearRecentSearches} className="text-xs text-brand-primary hover:underline">
+                        {lang === 'hi' ? 'हटाएं' : 'Clear'}
+                      </button>
                     </div>
                     {recentSearches.slice(0, 4).map((q) => (
                       <button

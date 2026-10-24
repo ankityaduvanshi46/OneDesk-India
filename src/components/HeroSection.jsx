@@ -49,7 +49,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-royal-800 border border-gold-500/35 shadow-sm text-xs font-bold text-gray-800 dark:text-gold-300 backdrop-blur-md"
             >
               <span className="text-sm">🇮🇳</span>
-              <span>Unified National Directory & Facilitation Desk</span>
+              <span>{lang === 'hi' ? 'एकीकृत राष्ट्रीय सरकारी सेवा पोर्टल एवं सहायता डेस्क' : 'Unified National Directory & Facilitation Desk'}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </motion.div>
 
@@ -82,7 +82,9 @@ export default function HeroSection() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed"
             >
-              One-stop facilitation for Aadhaar, Driving Licence, PAN Card, Income & Caste Certificates. Verified direct links, cryptographic QR attestation, and private document locker.
+              {lang === 'hi'
+                ? 'आधार, ड्राइविंग लाइसेंस, पैन कार्ड, आय और जाति प्रमाण पत्र के लिए एकल खिड़की सुविधा। सीधे सत्यापित लिंक, क्यूआर सत्यापन और सुरक्षित डिजिटल लॉकर।'
+                : 'One-stop facilitation for Aadhaar, Driving Licence, PAN Card, Income & Caste Certificates. Verified direct links, cryptographic QR attestation, and private document locker.'}
             </motion.p>
 
             {/* Live Autocomplete Search Bar */}
@@ -106,7 +108,7 @@ export default function HeroSection() {
                 to="/apply"
                 className="btn-luxury flex items-center gap-2 text-xs sm:text-sm px-6 py-3 font-bold shadow-lg"
               >
-                <span>⚡ Apply Online (Hub)</span>
+                <span>{lang === 'hi' ? '⚡ ऑनलाइन आवेदन करें' : '⚡ Apply Online (Hub)'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -114,14 +116,14 @@ export default function HeroSection() {
                 className="btn-luxury-outline flex items-center gap-2 text-xs sm:text-sm px-6 py-3 font-semibold"
               >
                 <Compass className="w-4 h-4 text-gold-500" />
-                <span>Guided Service Wizard</span>
+                <span>{lang === 'hi' ? 'मार्गदर्शित सेवा विज़ार्ड' : 'Guided Service Wizard'}</span>
               </Link>
               <Link
                 to="/verify-document"
                 className="px-4 py-3 rounded-xl border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-all flex items-center gap-1.5"
               >
                 <QrCode className="w-4 h-4" />
-                <span>Verify QR Attestation</span>
+                <span>{lang === 'hi' ? 'दस्तावेज़ क्यूआर सत्यापन' : 'Verify QR Attestation'}</span>
               </Link>
             </motion.div>
 

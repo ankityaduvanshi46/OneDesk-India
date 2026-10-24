@@ -44,20 +44,21 @@ const BlogPage = lazy(() => import('./pages/BlogPage'))
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'))
 
 export default function App() {
-  const { initTheme, theme, fontSize } = useAppStore()
+  const { initTheme, initLanguage, theme, fontSize } = useAppStore()
   const { checkAuth } = useAuthStore()
   const [loading, setLoading] = useState(true)
   const location = useLocation()
 
   useEffect(() => {
     initTheme()
+    initLanguage()
     checkAuth()
     initAnalytics()
     const timer = setTimeout(() => {
       setLoading(false)
     }, 900)
     return () => clearTimeout(timer)
-  }, [initTheme, checkAuth])
+  }, [initTheme, initLanguage, checkAuth])
 
   // Track pageviews on SPA navigation
   useEffect(() => {

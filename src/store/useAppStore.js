@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import i18n from '../i18n'
 import { services as defaultServices } from '../data/services'
 import { isOfficialDomain, isValidUrl } from '../utils/helpers'
 
@@ -33,8 +34,17 @@ export const useAppStore = create(
         get().setTheme(current === 'dark' ? 'light' : 'dark')
       },
 
-      setLanguage: (language) => set({ language }),
-      toggleLanguage: () => set((s) => ({ language: s.language === 'en' ? 'hi' : 'en' })),
+      setLanguage: (language) => {
+        set({ language })
+        i18n.changeLanguage(language)
+        if (typeof document !== 'undefined') {
+          document.documentElement.lang = language
+        }
+      },
+      toggleLanguage: () => {
+        const nextLang = get().language === 'en' ? 'hi' : 'en'
+        get().setLanguage(nextLang)
+      },
 
       setFontSize: (fontSize) => set({ fontSize }),
       cycleFontSize: () => {
@@ -136,6 +146,15 @@ export const useAppStore = create(
         const { theme } = get()
         if (theme === 'dark') {
           document.documentElement.classList.add('dark')
+        }
+      },
+
+      initLanguage: () => {
+        const { language } = get()
+        const target = language || 'en'
+        i18n.changeLanguage(target)
+        if (typeof document !== 'undefined') {
+          document.documentElement.lang = target
         }
       }
     }),

@@ -9,7 +9,7 @@ import { AuditLog } from '../models/AuditLog.js'
 import { generateOTP, hashGovId, maskGovId } from '../utils/otp.js'
 import { generateRegisterId } from '../utils/idGenerator.js'
 import { sendOtpEmail } from '../utils/mailer.js'
-import { authenticate } from '../middleware/auth.js'
+import { authenticate, optionalAuth } from '../middleware/auth.js'
 import { authLimiter, otpLimiter } from '../middleware/rateLimiter.js'
 import { validateBody } from '../middleware/validate.js'
 import {
@@ -35,6 +35,7 @@ function generateTokenAndSetCookie(res, user) {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'strict' : 'lax',
+    path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000
   })
 
@@ -358,24 +359,27 @@ router.post('/login', authLimiter, validateBody(loginSchema), async (req, res, n
   }
 })
 
-router.post('/logout', authenticate, async (req, res, next) => {
+router.post('/logout', optionalAuth, async (req, res, next) => {
   try {
     const isProduction = process.env.NODE_ENV === 'production'
     res.clearCookie('onedesk_token', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax'
+      sameSite: isProduction ? 'strict' : 'lax',
+      path: '/'
     })
 
-    await AuditLog.create({
-      userId: req.user._id,
-      userRole: req.user.role,
-      action: 'USER_LOGOUT',
-      resource: 'User',
-      resourceId: req.user._id.toString(),
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent') || ''
-    })
+    if (req.user) {
+      await AuditLog.create({
+        userId: req.user._id,
+        userRole: req.user.role,
+        action: 'USER_LOGOUT',
+        resource: 'User',
+        resourceId: req.user._id.toString(),
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || ''
+      }).catch(() => null)
+    }
 
     res.json({
       success: true,
@@ -564,10 +568,33 @@ router.post('/reset-password', authLimiter, async (req, res, next) => {
       verified: false
     }).sort({ createdAt: -1 })
 
-    if (!otpRecord || otpRecord.code !== code.trim()) {
+    if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired password reset code.'
+        message: 'No active password reset code found or it has already expired. Please request a new code.'
+      })
+    }
+
+    if (new Date() > otpRecord.expiresAt) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password reset code has expired. Please request a new code.'
+      })
+    }
+
+    if (otpRecord.attempts >= 3) {
+      return res.status(429).json({
+        success: false,
+        message: 'Maximum attempts reached for this code. Please request a new password reset code.'
+      })
+    }
+
+    if (otpRecord.code !== code.trim()) {
+      otpRecord.attempts = (otpRecord.attempts || 0) + 1
+      await otpRecord.save()
+      return res.status(400).json({
+        success: false,
+        message: `Incorrect reset code. ${3 - otpRecord.attempts} attempt(s) remaining.`
       })
     }
 

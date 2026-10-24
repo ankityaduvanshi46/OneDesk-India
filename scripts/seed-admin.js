@@ -14,7 +14,7 @@ async function seedSuperAdmin() {
   const adminEmail = (process.env.ADMIN_BOOTSTRAP_EMAIL || 'ankityadavlko46@gmail.com').trim().toLowerCase()
   const rawPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || 'veer3320'
   const adminName = process.env.ADMIN_BOOTSTRAP_NAME || 'Ankit Yadav (Super Admin)'
-  const mobile = process.env.ADMIN_BOOTSTRAP_MOBILE || '9876543210'
+  const mobile = process.env.ADMIN_BOOTSTRAP_MOBILE || undefined
 
   try {
     let user = await User.findOne({ email: adminEmail })

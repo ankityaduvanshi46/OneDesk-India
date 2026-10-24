@@ -259,7 +259,7 @@ export default function Navbar() {
             to="/apply"
             className="px-3 py-1.5 text-xs font-bold text-saffron hover:underline rounded-lg transition-colors flex items-center gap-1"
           >
-            <span>Apply Online</span>
+            <span>{language === 'hi' ? 'ऑनलाइन आवेदन' : 'Apply Online'}</span>
             <span className="text-[10px] px-1 py-0.2 rounded bg-saffron/15 text-saffron font-extrabold uppercase">
               Fast
             </span>
@@ -276,14 +276,14 @@ export default function Navbar() {
             to="/blog"
             className="px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-primary dark:hover:text-gold-400 rounded-lg transition-colors"
           >
-            Guides
+            {language === 'hi' ? 'गाइड्स' : 'Guides'}
           </Link>
 
           <Link
             to="/verify-document"
             className="px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline rounded-lg transition-colors"
           >
-            Verify Certificate
+            {language === 'hi' ? 'प्रमाणपत्र सत्यापन' : 'Verify Certificate'}
           </Link>
 
           <Link
@@ -458,13 +458,13 @@ export default function Navbar() {
                 to="/login"
                 className="px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-royal-800 transition-colors"
               >
-                Log In
+                {language === 'hi' ? 'लॉग इन' : 'Log In'}
               </Link>
               <Link
                 to="/register"
                 className="btn-luxury px-3.5 py-1.5 text-xs font-bold shrink-0 shadow-md"
               >
-                Register
+                {language === 'hi' ? 'रजिस्टर' : 'Register'}
               </Link>
             </div>
           )}
@@ -522,12 +522,21 @@ export default function Navbar() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-royal-800">
                   <Logo size="sm" />
-                  <button
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-white"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={toggleLanguage}
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-royal-700 bg-gray-50 dark:bg-royal-800"
+                      aria-label="Toggle language"
+                    >
+                      {language === 'en' ? 'हिन्दी' : 'English'}
+                    </button>
+                    <button
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 {isAuthenticated && (
@@ -562,7 +571,7 @@ export default function Navbar() {
                     onClick={() => setMobileDrawerOpen(false)}
                     className="block px-3 py-2.5 rounded-xl bg-saffron/10 text-saffron font-bold"
                   >
-                    ⚡ Apply Online (Hub)
+                    ⚡ {language === 'hi' ? 'ऑनलाइन आवेदन' : 'Apply Online (Hub)'}
                   </Link>
                   <Link
                     to="/wizard"
@@ -576,7 +585,7 @@ export default function Navbar() {
                     onClick={() => setMobileDrawerOpen(false)}
                     className="block px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-emerald-600 dark:text-emerald-400 font-bold"
                   >
-                    🛡️ Verify Certificate (QR)
+                    🛡️ {language === 'hi' ? 'प्रमाणपत्र सत्यापन' : 'Verify Certificate (QR)'}
                   </Link>
                   <Link
                     to="/scam-check"
@@ -590,48 +599,48 @@ export default function Navbar() {
                     onClick={() => setMobileDrawerOpen(false)}
                     className="block px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gold-500 font-bold"
                   >
-                    🎨 Design System Spec
+                    🎨 {language === 'hi' ? 'डिज़ाइन सिस्टम' : 'Design System Spec'}
                   </Link>
 
                   {isAuthenticated && (
                     <>
                       <div className="pt-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-gray-400">
-                        Citizen Desk
+                        {language === 'hi' ? 'नागरिक डेस्क' : 'Citizen Desk'}
                       </div>
                       <Link
                         to="/dashboard"
                         onClick={() => setMobileDrawerOpen(false)}
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
-                        📊 Citizen Dashboard
+                        📊 {language === 'hi' ? 'नागरिक डैशबोर्ड' : 'Citizen Dashboard'}
                       </Link>
                       <Link
                         to="/documents"
                         onClick={() => setMobileDrawerOpen(false)}
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
-                        📂 Digital Document Locker
+                        📂 {language === 'hi' ? 'डिजिटल दस्तावेज़ लॉकर' : 'Digital Document Locker'}
                       </Link>
                       <Link
                         to="/family-profiles"
                         onClick={() => setMobileDrawerOpen(false)}
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
-                        👨‍👩‍👧 Family Profiles
+                        👨‍👩‍👧 {language === 'hi' ? 'परिवार प्रोफाइल' : 'Family Profiles'}
                       </Link>
                       <Link
                         to="/support"
                         onClick={() => setMobileDrawerOpen(false)}
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
-                        🎧 Citizen Helpdesk
+                        🎧 {language === 'hi' ? 'नागरिक सहायता केंद्र' : 'Citizen Helpdesk'}
                       </Link>
                       <Link
                         to="/profile"
                         onClick={() => setMobileDrawerOpen(false)}
                         className="block px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-royal-800 text-gray-700 dark:text-gray-300"
                       >
-                        👤 Profile & Settings
+                        👤 {language === 'hi' ? 'प्रोफ़ाइल एवं सेटिंग्स' : 'Profile & Settings'}
                       </Link>
                     </>
                   )}
@@ -645,7 +654,7 @@ export default function Navbar() {
                     className="w-full btn-luxury-outline text-xs text-red-600 flex items-center justify-center gap-2 py-2.5"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
+                    <span>{language === 'hi' ? 'साइन आउट' : 'Sign Out'}</span>
                   </button>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
@@ -654,14 +663,14 @@ export default function Navbar() {
                       onClick={() => setMobileDrawerOpen(false)}
                       className="btn-luxury-outline text-center text-xs py-2.5 font-bold"
                     >
-                      Log In
+                      {language === 'hi' ? 'लॉग इन' : 'Log In'}
                     </Link>
                     <Link
                       to="/register"
                       onClick={() => setMobileDrawerOpen(false)}
                       className="btn-luxury text-center text-xs py-2.5 font-bold"
                     >
-                      Register
+                      {language === 'hi' ? 'रजिस्टर' : 'Register'}
                     </Link>
                   </div>
                 )}

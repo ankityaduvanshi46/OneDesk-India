@@ -148,14 +148,14 @@ export default function MyDocumentsPage() {
   const handleDownload = async (doc) => {
     try {
       if (doc.signedDownloadUrl) {
-        window.open(doc.signedDownloadUrl, '_blank')
+        window.open(doc.signedDownloadUrl, '_blank', 'noopener,noreferrer')
         return
       }
       const res = await api.documents.getDownloadUrl(doc._id)
       if (res?.downloadUrl) {
-        window.open(res.downloadUrl, '_blank')
+        window.open(res.downloadUrl, '_blank', 'noopener,noreferrer')
       } else {
-        window.open(api.documents.download(doc._id), '_blank')
+        window.open(api.documents.download(doc._id), '_blank', 'noopener,noreferrer')
       }
     } catch {
       toast.error('Could not generate download link.')

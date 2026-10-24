@@ -12,7 +12,8 @@ import { useAppStore } from '../store/useAppStore'
 import { sanitizeInput } from '../utils/helpers'
 
 export default function ServicesPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const [searchParams, setSearchParams] = useSearchParams()
   const { selectedState, getAllServices } = useAppStore()
 
@@ -118,7 +119,7 @@ export default function ServicesPage() {
               className="btn-luxury text-xs py-2 px-3.5 flex items-center gap-1.5"
             >
               <span>✨</span>
-              <span>Auto-Add Portal</span>
+              <span>{lang === 'hi' ? 'पोर्टल जोड़ें' : 'Auto-Add Portal'}</span>
             </button>
             <StateSelector />
           </div>
@@ -170,7 +171,7 @@ export default function ServicesPage() {
             onClick={handleReset}
             className="btn-luxury text-xs px-6 py-2.5"
           >
-            Reset Filters
+            {lang === 'hi' ? 'फ़िल्टर रीसेट करें' : 'Reset Filters'}
           </button>
         </div>
       )}
