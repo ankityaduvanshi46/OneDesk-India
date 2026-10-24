@@ -59,7 +59,9 @@ export const api = {
   documents: {
     getMy: () => request('/documents/my'),
     verify: (verificationId) => request(`/documents/verify/${encodeURIComponent(verificationId)}`),
-    download: (id) => `${API_BASE}/documents/download/${id}`
+    download: (id) => `${API_BASE}/documents/download/${id}`,
+    // Returns { success, downloadUrl, expiresInSeconds } — redirect to downloadUrl
+    getDownloadUrl: (id) => request(`/documents/download/${id}`)
   },
   notifications: {
     getAll: () => request('/notifications'),

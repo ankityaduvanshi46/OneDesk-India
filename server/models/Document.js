@@ -38,6 +38,10 @@ const documentSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    publicId: {
+      type: String,
+      default: null        // Cloudinary public_id for generating signed download URLs
+    },
     fileUrl: {
       type: String,
       required: true

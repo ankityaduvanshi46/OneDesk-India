@@ -117,6 +117,45 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const exportApplicationsToCSV = () => {
+    if (!applications.length) {
+      toast.error('No applications to export.')
+      return
+    }
+    const headers = ['App Number', 'Citizen Name', 'Mobile', 'Email', 'Service', 'Status', 'Date']
+    const rows = applications.map((app) => [
+      `"${app.applicationNo || ''}"`,
+      `"${(app.userId?.name || '').replace(/"/g, '""')}"`,
+      `"${app.userId?.mobile || ''}"`,
+      `"${app.userId?.email || ''}"`,
+      `"${(app.serviceName || '').replace(/"/g, '""')}"`,
+      `"${app.status || ''}"`,
+      `"${new Date(app.createdAt).toISOString()}"`
+    ])
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `onedesk_applications_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success('Applications exported to CSV!')
+  }
+
+  const handleToggleUserStatus = async (targetUser) => {
+    const nextStatus = targetUser.status === 'suspended' ? 'active' : 'suspended'
+    try {
+      const res = await api.admin.updateUserStatus(targetUser._id, nextStatus)
+      if (res?.success) {
+        toast.success(`User is now ${nextStatus}!`)
+        loadAdminData()
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to update user status.')
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
@@ -201,18 +240,29 @@ export default function AdminDashboardPage() {
               ))}
             </div>
 
-            <div className="relative max-w-xs w-full">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <Search className="w-4 h-4" />
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
-                placeholder="Search by app # or service..."
-                className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-royal-850 border border-gray-200 dark:border-royal-700 rounded-xl text-xs"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={exportApplicationsToCSV}
+                className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-royal-700 bg-white dark:bg-royal-800 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:border-gold-500/50 flex items-center gap-1.5 shrink-0"
+              >
+                <Download className="w-3.5 h-3.5 text-gold-500" />
+                <span>Export CSV</span>
+              </button>
+
+              <div className="relative max-w-xs w-full">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <Search className="w-4 h-4" />
+                </span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
+                  placeholder="Search by app # or service..."
+                  className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-royal-850 border border-gray-200 dark:border-royal-700 rounded-xl text-xs"
+                />
+              </div>
             </div>
           </div>
 
@@ -263,6 +313,156 @@ export default function AdminDashboardPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Users className="w-4 h-4 text-gold-500" />
+              <span>Registered Citizens Directory ({usersList.length})</span>
+            </h2>
+            <div className="relative max-w-xs w-full">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Search className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
+                placeholder="Search citizen name, email, mobile..."
+                className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-royal-850 border border-gray-200 dark:border-royal-700 rounded-xl text-xs"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-royal-850 rounded-2xl border border-gray-100 dark:border-royal-700 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-gray-50 dark:bg-royal-900/60 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-100 dark:border-royal-700">
+                  <tr>
+                    <th className="p-3.5">Register ID</th>
+                    <th className="p-3.5">Name</th>
+                    <th className="p-3.5">Contact</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5">Joined</th>
+                    <th className="p-3.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-royal-800">
+                  {usersList.map((u) => (
+                    <tr key={u._id} className="hover:bg-gray-50/50 dark:hover:bg-royal-800/40">
+                      <td className="p-3.5 font-mono font-bold text-gray-900 dark:text-white">
+                        {u.registerId}
+                      </td>
+                      <td className="p-3.5 font-medium text-gray-800 dark:text-gray-200">
+                        {u.name}
+                        {u.govIdMasked && <div className="text-[10px] text-gray-400">{u.govIdMasked}</div>}
+                      </td>
+                      <td className="p-3.5 text-gray-600 dark:text-gray-300">
+                        <div>+91 {u.mobile}</div>
+                        <div className="text-[10px] text-gray-400">{u.email}</div>
+                      </td>
+                      <td className="p-3.5">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          u.status === 'active'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                            : 'bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300'
+                        }`}>
+                          {u.status || 'active'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-gray-400">
+                        {new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="p-3.5 text-right">
+                        {user?.role === 'super_admin' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUserStatus(u)}
+                            className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                              u.status === 'suspended'
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 hover:bg-red-100'
+                            }`}
+                          >
+                            {u.status === 'suspended' ? 'Activate' : 'Suspend'}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-[11px]">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {usersList.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-gray-400 text-xs">
+                        No citizens matching search criteria.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'audit' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Activity className="w-4 h-4 text-gold-500" />
+              <span>Security & Audit Trails ({auditLogs.length})</span>
+            </h2>
+          </div>
+
+          <div className="bg-white dark:bg-royal-850 rounded-2xl border border-gray-100 dark:border-royal-700 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-gray-50 dark:bg-royal-900/60 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-100 dark:border-royal-700">
+                  <tr>
+                    <th className="p-3.5">Action</th>
+                    <th className="p-3.5">Resource</th>
+                    <th className="p-3.5">Initiator</th>
+                    <th className="p-3.5">IP Address</th>
+                    <th className="p-3.5">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-royal-800">
+                  {auditLogs.map((log) => (
+                    <tr key={log._id} className="hover:bg-gray-50/50 dark:hover:bg-royal-800/40">
+                      <td className="p-3.5 font-mono font-bold text-gold-600 dark:text-gold-400">
+                        {log.action}
+                      </td>
+                      <td className="p-3.5 text-gray-700 dark:text-gray-300">
+                        {log.resource}
+                      </td>
+                      <td className="p-3.5 text-gray-800 dark:text-gray-200">
+                        <span className="font-medium">{log.userId?.name || 'System / Auto'}</span>
+                        {log.userId?.email && <div className="text-[10px] text-gray-400">{log.userId.email}</div>}
+                      </td>
+                      <td className="p-3.5 font-mono text-[11px] text-gray-400">
+                        {log.ipAddress || '127.0.0.1'}
+                      </td>
+                      <td className="p-3.5 text-gray-400">
+                        {new Date(log.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                      </td>
+                    </tr>
+                  ))}
+                  {auditLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-gray-400 text-xs">
+                        No audit logs recorded yet.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

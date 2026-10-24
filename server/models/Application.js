@@ -4,11 +4,12 @@ const uploadedFileSchema = new mongoose.Schema(
   {
     documentType: { type: String, required: true },
     originalName: { type: String, required: true },
-    fileName: { type: String, required: true },
-    fileUrl: { type: String, required: true },
-    mimeType: { type: String, required: true },
-    sizeBytes: { type: Number, required: true },
-    uploadedAt: { type: Date, default: Date.now }
+    fileName:     { type: String },          // local filename (legacy / dev only)
+    publicId:     { type: String },          // Cloudinary public_id for signed URL generation
+    fileUrl:      { type: String, required: true },
+    mimeType:     { type: String, required: true },
+    sizeBytes:    { type: Number, required: true },
+    uploadedAt:   { type: Date, default: Date.now }
   },
   { _id: true }
 )
