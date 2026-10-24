@@ -57,7 +57,13 @@ export const api = {
     uploadFile: (formData) => request('/applications/upload-file', { method: 'POST', body: formData })
   },
   documents: {
-    getMy: () => request('/documents/my'),
+    getMy: (params = {}) => {
+      const qs = new URLSearchParams(params).toString()
+      return request(`/documents/my${qs ? `?${qs}` : ''}`)
+    },
+    upload: (formData) => request('/documents/upload', { method: 'POST', body: formData }),
+    update: (id, payload) => request(`/documents/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+    delete: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
     verify: (verificationId) => request(`/documents/verify/${encodeURIComponent(verificationId)}`),
     download: (id) => `${API_BASE}/documents/download/${id}`,
     // Returns { success, downloadUrl, expiresInSeconds } — redirect to downloadUrl

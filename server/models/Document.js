@@ -23,12 +23,32 @@ const documentSchema = new mongoose.Schema(
     applicationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Application',
-      required: true,
+      required: false,
+      default: null,
       index: true
     },
     serviceId: {
       type: String,
-      required: true
+      default: 'locker'
+    },
+    category: {
+      type: String,
+      enum: ['identity', 'transport', 'certificates', 'tax_finance', 'education', 'health', 'employment', 'land_property', 'utilities', 'other'],
+      default: 'identity',
+      index: true
+    },
+    docType: {
+      type: String,
+      default: 'custom'
+    },
+    isSelfUploaded: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    notes: {
+      type: String,
+      default: ''
     },
     title: {
       type: String,
