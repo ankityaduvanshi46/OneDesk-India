@@ -1,5 +1,6 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import { isDBConnected } from '../config/db.js'
 import { User } from '../models/User.js'
 import { OTP } from '../models/OTP.js'
 import { Application } from '../models/Application.js'
@@ -42,6 +43,12 @@ function generateTokenAndSetCookie(res, user) {
 
 router.post('/register', authLimiter, validateBody(registerSchema), async (req, res, next) => {
   try {
+    if (!isDBConnected()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection is temporarily unavailable. Please verify MONGODB_URI configuration in Vercel settings.'
+      })
+    }
     const { name, email, mobile, password, govIdNumber, govIdType = 'aadhaar_last4', state, city, dpdpConsent } = req.body
 
     const cleanEmail = email.trim().toLowerCase()
@@ -268,6 +275,12 @@ router.post('/resend-otp', otpLimiter, validateBody(resendOtpSchema), async (req
 
 router.post('/login', authLimiter, validateBody(loginSchema), async (req, res, next) => {
   try {
+    if (!isDBConnected()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection is temporarily unavailable. Please verify MONGODB_URI configuration in Vercel settings.'
+      })
+    }
     const { identifier, password } = req.body
 
     const cleanId = identifier.trim()

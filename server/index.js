@@ -101,6 +101,18 @@ app.use((req, res, next) => {
   next()
 })
 
+// Ensure DB connection in serverless environments
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api') && req.path !== '/api/health' && !isDBConnected() && process.env.MONGODB_URI) {
+    try {
+      await connectDB()
+    } catch {
+      // proceed, route handler will handle disconnected state
+    }
+  }
+  next()
+})
+
 app.use('/api', apiLimiter)
 
 const uploadsPath = path.resolve('server/uploads')

@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 
+mongoose.set('bufferCommands', false)
+
 let cached = global.mongoose
 
 if (!cached) {
