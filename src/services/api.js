@@ -87,6 +87,18 @@ export const api = {
     getAuditLogs: (params = {}) => {
       const qs = new URLSearchParams(params).toString()
       return request(`/admin/audit-logs${qs ? `?${qs}` : ''}`)
-    }
+    },
+    // Services CRUD (admin only)
+    createService: (payload) => request('/services', { method: 'POST', body: JSON.stringify(payload) }),
+    updateService: (serviceId, payload) => request(`/services/${serviceId}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteService: (serviceId) => request(`/services/${serviceId}`, { method: 'DELETE' })
+  },
+  // Public services catalog
+  services: {
+    getAll: (params = {}) => {
+      const qs = new URLSearchParams(params).toString()
+      return request(`/services${qs ? `?${qs}` : ''}`)
+    },
+    getOne: (serviceId) => request(`/services/${serviceId}`)
   }
 }

@@ -5,7 +5,7 @@ import { AuditLog } from '../models/AuditLog.js'
 import { generateApplicationNo } from '../utils/idGenerator.js'
 import { sendApplicationStatusEmail } from '../utils/mailer.js'
 import { authenticate } from '../middleware/auth.js'
-import { upload } from '../middleware/upload.js'
+import { upload, getSignedUrl, cloudinaryEnabled } from '../middleware/upload.js'
 
 const router = express.Router()
 
@@ -16,15 +16,34 @@ router.post('/upload-file', authenticate, upload.single('file'), async (req, res
     }
 
     const { documentType = 'general_doc' } = req.body
-    const fileUrl = `/api/uploads/${req.file.filename}`
+
+    // Cloudinary path is in req.file.path (full URL) and req.file.filename (public_id)
+    // Memory-storage fallback: req.file.path is undefined, build a placeholder
+    let fileUrl   = null
+    let publicId  = null
+    let cloudUrl  = null
+
+    if (cloudinaryEnabled && req.file.path) {
+      // CloudinaryStorage sets req.file.path = delivery URL and req.file.filename = public_id
+      fileUrl  = req.file.path    // raw delivery URL (private — do not expose directly)
+      publicId = req.file.filename
+      // Generate a 1-hour signed URL for immediate preview
+      const resourceType = req.file.mimetype === 'application/pdf' ? 'raw' : 'image'
+      cloudUrl = getSignedUrl(publicId, resourceType, 3600)
+    } else {
+      // No cloud storage — mock URL for local dev
+      fileUrl  = `/api/uploads/mock/${req.file.originalname}`
+      publicId = null
+      cloudUrl = null
+    }
 
     res.json({
       success: true,
       file: {
         documentType,
         originalName: req.file.originalname,
-        fileName: req.file.filename,
-        fileUrl,
+        publicId,       // stored in MongoDB, used to regenerate signed URLs
+        fileUrl: cloudUrl || fileUrl,
         mimeType: req.file.mimetype,
         sizeBytes: req.file.size,
         uploadedAt: new Date()

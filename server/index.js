@@ -15,6 +15,7 @@ import documentRoutes from './routes/documentRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
 import ticketRoutes from './routes/ticketRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import serviceRoutes from './routes/serviceRoutes.js'
 import { generateRegisterId } from './utils/idGenerator.js'
 
 dotenv.config()
@@ -95,6 +96,7 @@ app.use('/api/documents', documentRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/tickets', ticketRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/services', serviceRoutes)
 
 app.use(errorHandler)
 
