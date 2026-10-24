@@ -1,15 +1,20 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import toast from 'react-hot-toast'
 import { User, Mail, Phone, Lock, ArrowRight, ShieldCheck, KeyRound, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
+import { sanitizeReturnUrl } from '../utils/helpers'
 import Logo from '../components/Logo'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { register, verifyOtp, resendOtp, otpPendingEmail } = useAuthStore()
+
+  const rawReturnUrl = searchParams.get('returnUrl') || '/dashboard'
+  const targetDestination = sanitizeReturnUrl(rawReturnUrl, '/dashboard')
 
   const [step, setStep] = useState(otpPendingEmail ? 2 : 1)
   const [formData, setFormData] = useState({
@@ -73,7 +78,7 @@ export default function RegisterPage() {
       setSubmitting(true)
       const user = await verifyOtp(otpCode.trim())
       toast.success(`Account verified! Welcome to OneDesk, ${user.name}.`)
-      navigate('/dashboard')
+      navigate(targetDestination)
     } catch (err) {
       toast.error(err.message || 'Invalid or expired OTP code.')
     } finally {
@@ -361,7 +366,10 @@ export default function RegisterPage() {
         <div className="mt-6 pt-6 border-t border-gray-100 dark:border-royal-700 text-center space-y-3">
           <p className="text-xs text-gray-600 dark:text-gray-400">
             Already registered?{' '}
-            <Link to="/login" className="font-bold text-saffron hover:underline">
+            <Link
+              to={searchParams.get('returnUrl') ? `/login?returnUrl=${encodeURIComponent(searchParams.get('returnUrl'))}` : '/login'}
+              className="font-bold text-saffron hover:underline"
+            >
               Log in here
             </Link>
           </p>

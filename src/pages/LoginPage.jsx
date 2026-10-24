@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import toast from 'react-hot-toast'
 import { Lock, Mail, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
+import { sanitizeReturnUrl } from '../utils/helpers'
 import Logo from '../components/Logo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { login } = useAuthStore()
 
   const [identifier, setIdentifier] = useState('')
@@ -17,7 +19,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const from = location.state?.from?.pathname || '/dashboard'
+  // Safely extract and validate returnUrl from query or router state
+  const rawTarget = searchParams.get('returnUrl') || location.state?.from?.pathname || '/dashboard'
+  const targetDestination = sanitizeReturnUrl(rawTarget, '/dashboard')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -33,7 +37,7 @@ export default function LoginPage() {
       if (user.role === 'super_admin' || user.role === 'staff') {
         navigate('/admin')
       } else {
-        navigate(from, { replace: true })
+        navigate(targetDestination, { replace: true })
       }
     } catch (err) {
       toast.error(err.message || 'Login failed. Please verify your credentials.')
@@ -134,7 +138,10 @@ export default function LoginPage() {
         <div className="mt-6 pt-6 border-t border-gray-100 dark:border-royal-700 text-center space-y-3">
           <p className="text-xs text-gray-600 dark:text-gray-400">
             Don't have an official OneDesk account?{' '}
-            <Link to="/register" className="font-bold text-saffron hover:underline">
+            <Link
+              to={searchParams.get('returnUrl') ? `/register?returnUrl=${encodeURIComponent(searchParams.get('returnUrl'))}` : '/register'}
+              className="font-bold text-saffron hover:underline"
+            >
               Register as Citizen
             </Link>
           </p>

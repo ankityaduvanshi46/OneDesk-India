@@ -50,6 +50,7 @@ export default function MyDocumentsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Helmet>
         <title>My Document Locker – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

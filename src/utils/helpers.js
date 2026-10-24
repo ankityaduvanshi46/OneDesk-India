@@ -59,6 +59,18 @@ export function cn(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
+export function sanitizeReturnUrl(returnUrl, fallback = '/dashboard') {
+  if (!returnUrl || typeof returnUrl !== 'string') return fallback
+  const trimmed = returnUrl.trim()
+  // Must start with exactly one '/' and not '//' (prevents protocol-relative open redirects)
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) return fallback
+  // Must not contain schemes or control chars
+  if (trimmed.includes('://') || trimmed.includes('\\') || BLOCKED_PROTOCOLS.some((p) => trimmed.toLowerCase().includes(p))) {
+    return fallback
+  }
+  return trimmed
+}
+
 export function debounce(fn, delay) {
   let timer
   return (...args) => {

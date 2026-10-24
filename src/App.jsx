@@ -9,6 +9,7 @@ import Layout from './components/Layout'
 import PageLoader from './components/ui/PageLoader'
 import Preloader from './components/Preloader'
 import ErrorBoundary from './components/ErrorBoundary'
+import ProtectedRoute from './components/ProtectedRoute'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
@@ -29,6 +30,7 @@ const SupportPage = lazy(() => import('./pages/SupportPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage'))
+const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage'))
 
 export default function App() {
   const { initTheme, theme, fontSize } = useAppStore()
@@ -68,6 +70,7 @@ export default function App() {
         <Layout>
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              {/* Public Routes (No login required, SEO-indexable) */}
               <Route path="/" element={<HomePage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/service/:id" element={<ServiceDetailPage />} />
@@ -75,17 +78,63 @@ export default function App() {
               <Route path="/favourites" element={<FavouritesPage />} />
               <Route path="/quick-links" element={<QuickLinksPage />} />
               <Route path="/scam-check" element={<ScamCheckPage />} />
-
+              <Route path="/verify-document" element={<VerifyDocumentPage />} />
+              <Route path="/refund-policy" element={<RefundPolicyPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/apply" element={<ApplyServicePage />} />
-              <Route path="/documents" element={<MyDocumentsPage />} />
-              <Route path="/verify-document" element={<VerifyDocumentPage />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
-              <Route path="/refund-policy" element={<RefundPolicyPage />} />
+              <Route path="/design-system" element={<DesignSystemPage />} />
+
+              {/* Login Required Routes (Citizen, Staff, Admin) */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apply"
+                element={
+                  <ProtectedRoute>
+                    <ApplyServicePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/documents"
+                element={
+                  <ProtectedRoute>
+                    <MyDocumentsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/support"
+                element={
+                  <ProtectedRoute>
+                    <SupportPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Administrative Routes (Restricted: Staff & Super Admin) */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requiredRoles={['staff', 'super_admin']}>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

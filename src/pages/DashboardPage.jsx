@@ -89,6 +89,7 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <Helmet>
         <title>Citizen Dashboard – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="bg-gradient-to-r from-royal-850 via-royal-900 to-royal-850 text-white rounded-2xl p-6 sm:p-8 border border-gold-500/30 shadow-luxury relative overflow-hidden">

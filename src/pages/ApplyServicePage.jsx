@@ -152,6 +152,7 @@ export default function ApplyServicePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <Helmet>
         <title>Apply for Service – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="text-center space-y-2">

@@ -63,6 +63,7 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Helmet>
         <title>Citizen Profile – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

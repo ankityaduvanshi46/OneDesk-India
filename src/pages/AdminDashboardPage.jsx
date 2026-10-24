@@ -169,6 +169,7 @@ export default function AdminDashboardPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <Helmet>
         <title>Administrative Command Desk – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="bg-royal-900 text-white rounded-2xl p-6 border border-gold-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
