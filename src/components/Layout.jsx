@@ -7,6 +7,7 @@ import Footer from './Footer'
 import AutoSyncBanner from './AutoSyncBanner'
 import InstallPwaBanner from './InstallPwaBanner'
 import Chatbot from './Chatbot'
+import CookieBanner from './CookieBanner'
 
 export default function Layout({ children }) {
   return (
@@ -21,6 +22,7 @@ export default function Layout({ children }) {
       <Footer />
       <BottomNav />
       <Chatbot />
+      <CookieBanner />
     </div>
   )
 }
