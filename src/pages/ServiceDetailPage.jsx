@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
 import toast from 'react-hot-toast'
 import confetti from 'canvas-confetti'
 import {
@@ -18,13 +17,16 @@ import {
   AlertTriangle,
   Sparkles,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  BookOpen
 } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { isValidUrl, isOfficialDomain, generateShareUrl, generateWhatsAppUrl } from '../utils/helpers'
 import { CategoryBadge } from '../components/ServiceCard'
 import ServiceCard from '../components/ServiceCard'
 import ServiceIllustration from '../components/design-system/ServiceIllustrations'
+import SEOHead from '../components/SEOHead'
+import { PUBLISHED_BLOG_ARTICLES } from '../data/blogPosts'
 
 export default function ServiceDetailPage() {
   const { id } = useParams()
@@ -38,6 +40,7 @@ export default function ServiceDetailPage() {
   const [checkedDocs, setCheckedDocs] = useState({})
   const [showQr, setShowQr] = useState(false)
   const [imgError, setImgError] = useState(false)
+  const [openFaq, setOpenFaq] = useState(null)
 
   if (!service) {
     return (
@@ -60,6 +63,11 @@ export default function ServiceDetailPage() {
   const relatedServices = (service.related || [])
     .map((relId) => allServices.find((s) => s.id === relId))
     .filter(Boolean)
+
+  // Find related citizen guide from our published articles
+  const relatedGuide = PUBLISHED_BLOG_ARTICLES.find(
+    (g) => g.relatedServiceId === service.id || g.category.toLowerCase() === service.category.toLowerCase()
+  )
 
   const toggleDocCheck = (doc) => {
     setCheckedDocs((prev) => ({ ...prev, [doc]: !prev[doc] }))
@@ -101,21 +109,102 @@ export default function ServiceDetailPage() {
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(generateShareUrl(service.id))}`
 
+  const hostname = (() => {
+    try {
+      return new URL(service.url).hostname
+    } catch {
+      return service.url || 'gov.in'
+    }
+  })()
+
+  // FAQs per service
+  const serviceFaqs = [
+    {
+      q: `What is the official government fee for ${service.name}?`,
+      a: `The official statutory fee is ${service.fees || 'Free of charge'}. When applying directly through the verified sovereign portal, only statutory government dues are payable.`
+    },
+    {
+      q: `What is the estimated processing turnaround time?`,
+      a: `Standard citizen charter SLA for ${service.name} is ${service.time || 'Varies by state'}. Online e-KYC submissions typically process faster than offline submissions.`
+    },
+    {
+      q: `Is the official website link verified on OneDesk?`,
+      a: `Yes. The official link (${hostname}) is cryptographically validated against Indian sovereign .gov.in and .nic.in domain records to protect you from spoofed and scam portals.`
+    },
+    {
+      q: `Can I apply through OneDesk Hub directly?`,
+      a: `Yes. You can use OneDesk single-window facilitation to prepare your documents, run automated validation checks, and securely store your issued certificate in your digital locker.`
+    }
+  ]
+
+  // Structured Data Schemas
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'GovernmentService',
+    name: service.name,
+    serviceType: service.category,
+    provider: {
+      '@type': 'GovernmentOrganization',
+      name: service.state ? `${service.state} State Government` : 'Government of India',
+      url: service.url
+    },
+    termsOfService: 'https://onedesk-india.vercel.app/terms',
+    url: `https://onedesk-india.vercel.app/services/${service.id}`
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://onedesk-india.vercel.app/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Services Directory',
+        item: 'https://onedesk-india.vercel.app/services'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: service.name,
+        item: `https://onedesk-india.vercel.app/services/${service.id}`
+      }
+    ]
+  }
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: serviceFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a
+      }
+    }))
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8 pb-28 sm:pb-8">
-      <Helmet>
-        <title>{serviceName} – Official Portal, Checklist & Application Guide | {t('siteName')}</title>
-        <meta
-          name="description"
-          content={`Official website, required documents checklist, fees, processing time, and step-by-step application guide for ${serviceName}.`}
-        />
-      </Helmet>
+      <SEOHead
+        title={`${serviceName} Official Portal & Guide`}
+        description={`Direct verified portal for ${serviceName}. Required documents checklist, official fees (${service.fees || 'Free'}), processing timeline (${service.time || 'Varies'}), and guide.`}
+        canonical={`/services/${service.id}`}
+        keywords={[service.name, `${service.name} online apply`, `${service.name} documents`, hostname, service.category]}
+        schema={[serviceSchema, breadcrumbSchema, faqSchema]}
+      />
 
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        <Link to="/" className="hover:text-saffron">Home</Link>
+        <Link to="/" className="hover:text-saffron transition-colors">Home</Link>
         <span>/</span>
-        <Link to="/services" className="hover:text-saffron">Services</Link>
+        <Link to="/services" className="hover:text-saffron transition-colors">Services</Link>
         <span>/</span>
         <span className="text-gray-800 dark:text-gray-200 font-semibold truncate">{serviceName}</span>
       </nav>
@@ -128,7 +217,7 @@ export default function ServiceDetailPage() {
               {service.logo && !imgError ? (
                 <img
                   src={service.logo}
-                  alt=""
+                  alt={`${serviceName} emblem`}
                   onError={() => setImgError(true)}
                   className="w-16 h-16 rounded-2xl object-contain bg-gray-50 dark:bg-royal-800 p-2 border border-gray-100 dark:border-gray-700 shadow-sm"
                 />
@@ -209,7 +298,7 @@ export default function ServiceDetailPage() {
         <div className="pt-4 border-t border-gray-100 dark:border-royal-750 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
             <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Verified Official Portal: <code className="font-mono font-bold">{(() => { try { return new URL(service.url).hostname } catch { return service.url || 'gov.in' } })()}</code></span>
+            <span>Verified Official Portal: <code className="font-mono font-bold">{hostname}</code></span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto flex-col sm:flex-row">
@@ -226,7 +315,7 @@ export default function ServiceDetailPage() {
               className="w-full sm:w-auto btn-luxury-outline px-6 py-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2"
             >
               <span>{t('serviceCard.openWebsite')}</span>
-              <span>↗</span>
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -240,7 +329,7 @@ export default function ServiceDetailPage() {
               className="pt-4 border-t border-gray-100 dark:border-royal-750 flex flex-col items-center text-center space-y-2"
             >
               <p className="text-xs text-gray-500">Scan QR Code to share service directly</p>
-              <img src={qrUrl} alt="QR Code" className="w-40 h-40 rounded-xl shadow-md border p-1 bg-white" />
+              <img src={qrUrl} alt={`QR Code for ${serviceName}`} className="w-40 h-40 rounded-xl shadow-md border p-1 bg-white" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -277,6 +366,22 @@ export default function ServiceDetailPage() {
           <div className="text-[10px] text-gray-400 mt-1">Toll-free citizen helpdesk</div>
         </div>
       </div>
+
+      {/* What is this Service & Who Needs It? */}
+      <section className="luxury-glass rounded-3xl p-6 sm:p-8 space-y-4 border border-gray-100 dark:border-royal-750">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-gold-500" />
+          <span>About {serviceName}: Purpose & Eligibility</span>
+        </h2>
+        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 space-y-2 leading-relaxed">
+          <p>
+            {serviceName} is an official civic entitlement provided under the jurisdiction of the relevant sovereign department. It enables eligible citizens to obtain legally recognized proof, register vital events, access statutory benefits, or fulfill compliance requirements mandated by Indian law.
+          </p>
+          <p>
+            <strong>Who Needs It?</strong> Any citizen residing in India (or respective state jurisdiction) requiring official verification for banking, educational admissions, employment onboarding, property registration, or travel credentials.
+          </p>
+        </div>
+      </section>
 
       {/* Interactive Required Documents Checklist */}
       {service.documents && service.documents.length > 0 && (
@@ -347,6 +452,62 @@ export default function ServiceDetailPage() {
         </section>
       )}
 
+      {/* Service FAQs Accordion */}
+      <section className="luxury-glass rounded-3xl p-6 sm:p-8 space-y-4 border border-gray-100 dark:border-royal-750">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          Frequently Asked Questions on {serviceName}
+        </h2>
+        <div className="space-y-3 pt-2">
+          {serviceFaqs.map((faq, idx) => (
+            <div
+              key={idx}
+              className="border border-gray-200 dark:border-royal-750 rounded-2xl overflow-hidden bg-white dark:bg-royal-850/60"
+            >
+              <button
+                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                className="w-full p-4 text-left flex items-center justify-between gap-4 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white hover:text-saffron transition-colors"
+              >
+                <span>{faq.q}</span>
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${openFaq === idx ? 'rotate-180 text-saffron' : 'text-gray-400'}`} />
+              </button>
+              <AnimatePresence>
+                {openFaq === idx && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="px-4 pb-4 text-xs text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-royal-800 pt-3 leading-relaxed"
+                  >
+                    {faq.a}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Related Citizen Guide / Knowledge Base Callout */}
+      {relatedGuide && (
+        <section className="p-6 rounded-3xl bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-royal-950 dark:via-royal-900 dark:to-royal-950 border border-gold-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-saffron uppercase tracking-wider">
+              <BookOpen className="w-4 h-4" />
+              <span>Recommended Citizen Reading</span>
+            </div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">{relatedGuide.title}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-1">{relatedGuide.summary}</p>
+          </div>
+          <Link
+            to={`/blog/${relatedGuide.slug}`}
+            className="btn-luxury px-5 py-2.5 text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-2"
+          >
+            <span>Read In-Depth Guide</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </section>
+      )}
+
       {/* Related Services */}
       {relatedServices.length > 0 && (
         <section className="space-y-4">
@@ -365,7 +526,7 @@ export default function ServiceDetailPage() {
       {/* Sticky Bottom Apply Action Bar for Mobile Viewports */}
       <div className="fixed bottom-16 inset-x-0 sm:hidden z-40 bg-white/95 dark:bg-royal-900/95 backdrop-blur-md p-3 border-t border-gray-200 dark:border-royal-800 flex items-center justify-between gap-3 shadow-2xl">
         <div className="min-w-0">
-          <span className="text-[10px] text-gray-400 block truncate">{serviceName}</span>
+          <span className="text-[10px] text-gray-500 block truncate">{serviceName}</span>
           <span className="text-xs font-bold text-gray-900 dark:text-white">{service.fees || 'Govt Free'}</span>
         </div>
         <Link

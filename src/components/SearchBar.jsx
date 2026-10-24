@@ -6,6 +6,7 @@ import Fuse from 'fuse.js'
 import { TRENDING_SERVICES } from '../data/services'
 import { useAppStore } from '../store/useAppStore'
 import { sanitizeInput, debounce } from '../utils/helpers'
+import { trackSearchQuery } from '../utils/analytics'
 
 export default function SearchBar({ compact = false, autoFocus = false }) {
   const { t } = useTranslation()
@@ -92,6 +93,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
         handleSelect(items[selectedIndex])
       } else if (query.trim()) {
         addRecentSearch(query.trim())
+        trackSearchQuery(query.trim(), results.length)
         navigate(`/services?q=${encodeURIComponent(query.trim())}`)
         setIsOpen(false)
         setQuery('')
@@ -101,7 +103,8 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
 
   const handleSelect = (service) => {
     addRecentSearch(service.name)
-    navigate(`/service/${service.id}`)
+    trackSearchQuery(service.name, 1)
+    navigate(`/services/${service.id}`)
     setIsOpen(false)
     setQuery('')
   }

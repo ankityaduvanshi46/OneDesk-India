@@ -19,6 +19,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore'
 import { api } from '../services/api'
 import { STATES } from '../data/services'
+import { trackApplyClick } from '../utils/analytics'
 
 const POPULAR_SERVICES = [
   { id: 'income-cert', name: 'Income Certificate (आय प्रमाण पत्र)', category: 'Certificates', fee: '₹50 Govt Fee', time: '3 to 7 working days' },
@@ -174,6 +175,7 @@ export default function ApplyServicePage() {
 
       const res = await api.applications.apply(payload)
       if (res?.success) {
+        trackApplyClick(selectedService.id, selectedService.name)
         toast.success('Application submitted successfully!')
         confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } })
         navigate('/dashboard')

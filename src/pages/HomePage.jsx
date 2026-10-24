@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import {
   Sparkles,
   ArrowRight,
@@ -145,15 +145,28 @@ export default function HomePage() {
     return list
   }, [allServices, activeCategory, selectedState])
 
+  const homeFaqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.a
+      }
+    }))
+  }
+
   return (
     <div className="space-y-16">
-      <Helmet>
-        <title>{t('siteName')} – Unified Indian Citizen Facilitation & Government Services Hub</title>
-        <meta
-          name="description"
-          content="OneDesk India: Premium single-window directory of direct links to 80+ official Indian government service portals. Guaranteed verified official domains."
-        />
-      </Helmet>
+      <SEOHead
+        title="Indian Government Services Directory"
+        description="Direct links to 80+ official Indian government services. Aadhaar, PAN, Passport, Ration Card, Driving Licence, and EPFO on verified sovereign portals."
+        canonical="/"
+        keywords={['indian government services', 'government portal directory', 'aadhaar online', 'pan card online', 'parivahan rto', 'digilocker']}
+        schema={homeFaqSchema}
+      />
 
       {/* Hero Section */}
       <HeroSection />

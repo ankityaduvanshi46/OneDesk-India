@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import SEOHead from '../components/SEOHead'
 import Fuse from 'fuse.js'
 import CategoryChips from '../components/CategoryChips'
 import StateSelector from '../components/StateSelector'
@@ -95,10 +95,12 @@ export default function ServicesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <Helmet>
-        <title>All Services Directory – {t('siteName')}</title>
-        <meta name="description" content="Browse all 80+ official Indian government services on OneDesk India. Direct portals for Aadhaar, Voter ID, PAN, Transport, e-District, Taxes, and Schemes." />
-      </Helmet>
+      <SEOHead
+        title="Government Services Directory (80+ Portals)"
+        description="Directory of 80+ official Indian government services. Filter by category or state for Aadhaar, PAN, Transport, Certificates, Taxes, and Schemes."
+        canonical="/services"
+        keywords={['government portals directory', 'indian public services', 'aadhaar', 'pan card', 'parivahan', 'edistrict']}
+      />
 
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

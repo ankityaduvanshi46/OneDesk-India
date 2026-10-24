@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { isValidUrl, isOfficialDomain } from '../utils/helpers'
+import { trackOfficialPortalClick } from '../utils/analytics'
 import confetti from 'canvas-confetti'
 import toast from 'react-hot-toast'
 
@@ -158,6 +159,7 @@ export default function ServiceCard({ service, index = 0 }) {
   const handleOpenExternal = (e) => {
     e.stopPropagation()
     addRecentlyOpened(service.id)
+    trackOfficialPortalClick(service.id, service.url)
     if (!isValidUrl(service.url) || !isOfficialDomain(service.url)) {
       toast.error('Could not verify official government domain for this portal.')
       return
@@ -201,7 +203,7 @@ export default function ServiceCard({ service, index = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.02, 0.25) }}
       whileHover={{ y: -4, transition: { duration: 0.18 } }}
-      onClick={() => navigate(`/service/${service.id}`)}
+      onClick={() => navigate(`/services/${service.id}`)}
       className="group relative bg-white dark:bg-royal-850 rounded-2xl p-5 border border-slate-200/90 dark:border-royal-750 shadow-sm hover:shadow-xl hover:border-gold-500/50 dark:hover:border-gold-500/40 transition-all cursor-pointer flex flex-col justify-between"
       aria-label={`${serviceName} – ${serviceDesc}`}
     >
@@ -214,7 +216,7 @@ export default function ServiceCard({ service, index = 0 }) {
               {service.logo && !imgError ? (
                 <img
                   src={service.logo}
-                  alt=""
+                  alt={`${serviceName} portal logo`}
                   onError={() => setImgError(true)}
                   className="w-8 h-8 object-contain rounded-lg"
                   loading="lazy"
@@ -335,7 +337,7 @@ export default function ServiceCard({ service, index = 0 }) {
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              navigate(`/service/${service.id}`)
+              navigate(`/services/${service.id}`)
             }}
             className="flex-1 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-royal-750 dark:hover:bg-royal-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all group-hover:bg-saffron dark:group-hover:bg-saffron"
           >

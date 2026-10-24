@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { sanitizeReturnUrl } from '../utils/helpers'
+import { trackRegistrationInitiated, trackRegistrationCompleted } from '../utils/analytics'
 import Logo from '../components/Logo'
 import { IdentityIllustration } from '../components/design-system/ServiceIllustrations'
 
@@ -83,6 +84,7 @@ export default function RegisterPage() {
         govIdType: formData.govIdType,
         password: formData.password
       })
+      trackRegistrationInitiated()
       toast.success('Registration initiated! 6-digit OTP sent to your email.')
       setStep(2)
     } catch (err) {
@@ -102,6 +104,7 @@ export default function RegisterPage() {
     try {
       setSubmitting(true)
       const user = await verifyOtp(otpCode.trim())
+      trackRegistrationCompleted()
       toast.success(`Account verified! Welcome to OneDesk, ${user.name}.`)
       navigate(targetDestination)
     } catch (err) {

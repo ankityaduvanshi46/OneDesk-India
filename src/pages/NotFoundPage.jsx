@@ -9,7 +9,8 @@ export default function NotFoundPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
       <Helmet>
-        <title>404 Page Not Found – {t('siteName')}</title>
+        <title>404 Page Not Found – OneDesk India</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="text-7xl font-black text-brand-primary" aria-hidden="true">
@@ -44,11 +45,12 @@ export default function NotFoundPage() {
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           {[
-            { label: 'Aadhaar', to: '/service/aadhaar' },
-            { label: 'PAN Card', to: '/service/pan-card' },
-            { label: 'Driving Licence', to: '/service/driving-licence' },
-            { label: 'Passport Seva', to: '/service/passport' },
-            { label: 'Voter ID', to: '/service/voter-id' }
+            { label: 'Aadhaar', to: '/services/aadhaar' },
+            { label: 'PAN Card', to: '/services/pan-card' },
+            { label: 'Driving Licence', to: '/services/driving-licence' },
+            { label: 'Passport Seva', to: '/services/passport' },
+            { label: 'Voter ID', to: '/services/voter-id' },
+            { label: 'Citizen Guides', to: '/blog' }
           ].map((item) => (
             <Link
               key={item.label}

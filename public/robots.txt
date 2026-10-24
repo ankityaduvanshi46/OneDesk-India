@@ -1,7 +1,24 @@
 User-agent: *
 Allow: /
+Allow: /services
+Allow: /services/
+Allow: /blog
+Allow: /blog/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /disclaimer
+Allow: /refund-policy
+Allow: /verify-document
+
+# Disallow Private Citizen Vault & Admin Workspaces
 Disallow: /admin
 Disallow: /dashboard
+Disallow: /apply
+Disallow: /documents
+Disallow: /profile
+Disallow: /family-profiles
 Disallow: /api/
 
 Sitemap: https://onedesk-india.vercel.app/sitemap.xml

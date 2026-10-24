@@ -58,7 +58,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/apply" className="hover:text-saffron font-semibold text-saffron">
+                <Link to="/blog" className="hover:text-saffron font-semibold text-saffron transition-colors flex items-center gap-1">
+                  <span>📖 Citizen Guides & Blog</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/apply" className="hover:text-saffron transition-colors">
                   ⚡ Apply Online Hub
                 </Link>
               </li>
@@ -78,9 +83,19 @@ export default function Footer() {
           {/* Column 4: Verification & Trust */}
           <div>
             <h3 className="font-bold text-xs uppercase tracking-wider text-gray-900 dark:text-white mb-3">
-              Safety & Verification
+              Trust & E-E-A-T
             </h3>
             <ul className="space-y-2 text-xs">
+              <li>
+                <Link to="/about" className="hover:text-saffron transition-colors">
+                  🏛️ About OneDesk India
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-saffron transition-colors">
+                  📞 Contact & Grievance Cell
+                </Link>
+              </li>
               <li>
                 <Link to="/verify-document" className="hover:text-emerald-500 font-semibold transition-colors flex items-center gap-1">
                   <span>🛡️ Verify Document (QR)</span>
@@ -92,13 +107,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/refund-policy" className="hover:text-saffron transition-colors">
-                  📜 Refund & Transparency Policy
+                <Link to="/disclaimer" className="hover:text-amber-500 transition-colors">
+                  ⚠️ Sovereign Disclaimer
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="hover:text-saffron transition-colors">
-                  🎧 Citizen Helpdesk & Grievance
+                <Link to="/refund-policy" className="hover:text-saffron transition-colors">
+                  📜 Refund & Transparency Policy
                 </Link>
               </li>
             </ul>
@@ -143,12 +158,16 @@ export default function Footer() {
             © {new Date().getFullYear()} OneDesk India. Designed for sovereign citizen digital empowerment.
           </div>
           <div className="flex items-center gap-4 text-xs">
-            <Link to="/refund-policy" className="hover:underline">
+            <Link to="/privacy" className="hover:underline">
               Privacy & DPDP Notice
             </Link>
             <span>•</span>
-            <Link to="/refund-policy" className="hover:underline">
+            <Link to="/terms" className="hover:underline">
               Terms of Facilitation
+            </Link>
+            <span>•</span>
+            <Link to="/disclaimer" className="hover:underline">
+              Sovereign Disclaimer
             </Link>
             <span>•</span>
             <Link to="/refund-policy" className="hover:underline">

@@ -273,6 +273,13 @@ export default function Navbar() {
           </Link>
 
           <Link
+            to="/blog"
+            className="px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-primary dark:hover:text-gold-400 rounded-lg transition-colors"
+          >
+            Guides
+          </Link>
+
+          <Link
             to="/verify-document"
             className="px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline rounded-lg transition-colors"
           >
