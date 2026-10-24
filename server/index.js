@@ -119,7 +119,15 @@ app.use('/api', apiLimiter)
 const uploadsPath = path.resolve('server/uploads')
 app.use('/api/uploads', express.static(uploadsPath))
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  // Attempt to connect if not already connected (covers cold-start race)
+  if (!isDBConnected() && process.env.MONGODB_URI) {
+    try {
+      await connectDB()
+    } catch {
+      // will be reflected in databaseConnected below
+    }
+  }
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
