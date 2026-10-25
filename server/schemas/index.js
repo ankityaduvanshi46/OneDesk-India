@@ -1,5 +1,55 @@
 import { z } from 'zod'
 
+// ─── Auth: Passwordless OTP flow ────────────────────────────────────────────
+
+/**
+ * Step 1 for both Register and Login: just send an email, optionally name (for registration).
+ * type = 'login' | 'register'
+ */
+export const sendOtpSchema = z.object({
+  email: z
+    .string({ required_error: 'Email address is required' })
+    .trim()
+    .toLowerCase()
+    .email('Please enter a valid email address'),
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(80, 'Name cannot exceed 80 characters')
+    .optional(),
+  type: z.enum(['login', 'register']).default('login')
+})
+
+/**
+ * Step 2: verify the 6-digit OTP.
+ * type = 'login' | 'register'
+ */
+export const verifyOtpSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required' })
+    .trim()
+    .toLowerCase()
+    .email('Valid email address required'),
+  code: z
+    .string({ required_error: 'Verification code is required' })
+    .trim()
+    .regex(/^\d{6}$/, 'Verification code must be exactly 6 numeric digits'),
+  type: z.enum(['login', 'register']).default('login'),
+  // Name is only required when type='register' and the user is new
+  name: z.string().trim().min(2).max(80).optional()
+})
+
+export const resendOtpSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required' })
+    .trim()
+    .toLowerCase()
+    .email('Valid email address required'),
+  type: z.enum(['login', 'register']).default('login')
+})
+
+// Kept for backward-compat (admin 2FA, legacy routes). Not used in main auth flow.
 export const registerSchema = z.object({
   name: z
     .string({ required_error: 'Full legal name is required' })
@@ -12,63 +62,28 @@ export const registerSchema = z.object({
     .toLowerCase()
     .email('Please enter a valid email address'),
   mobile: z
-    .string({ required_error: 'Mobile number is required' })
-    .trim()
-    .regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9'),
-  password: z
-    .string({ required_error: 'Password is required' })
-    .min(8, 'Password must be at least 8 characters long'),
-  govIdNumber: z
     .string()
     .trim()
-    .optional()
-    .nullable(),
+    .regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9')
+    .optional(),
+  password: z.string().min(8, 'Password must be at least 8 characters long').optional(),
+  govIdNumber: z.string().trim().optional().nullable(),
   govIdType: z
     .enum(['aadhaar_last4', 'pan', 'voter_id', 'driving_licence', 'other'])
     .default('aadhaar_last4'),
   state: z.string().trim().optional(),
   city: z.string().trim().optional(),
-  dpdpConsent: z
-    .boolean()
-    .optional()
-    .default(true)
+  dpdpConsent: z.boolean().optional().default(true)
 })
 
 export const loginSchema = z.object({
-  identifier: z
-    .string({ required_error: 'Email, Mobile, or Register ID is required' })
-    .trim()
-    .min(1, 'Please enter your login identifier'),
-  password: z
-    .string({ required_error: 'Password is required' })
-    .min(1, 'Please enter your password')
+  // Allow legacy identifier-based login gracefully (will be redirected to OTP flow)
+  identifier: z.string().trim().min(1).optional(),
+  email: z.string().trim().toLowerCase().email().optional(),
+  password: z.string().optional()
 })
 
-export const verifyOtpSchema = z.object({
-  email: z
-    .string({ required_error: 'Email is required' })
-    .trim()
-    .toLowerCase()
-    .email('Valid email address required'),
-  code: z
-    .string({ required_error: 'Verification code is required' })
-    .trim()
-    .regex(/^\d{6}$/, 'Verification code must be exactly 6 numeric digits'),
-  type: z
-    .enum(['email_verification', 'mobile_verification', 'password_reset', 'admin_2fa'])
-    .default('email_verification')
-})
-
-export const resendOtpSchema = z.object({
-  email: z
-    .string({ required_error: 'Email is required' })
-    .trim()
-    .toLowerCase()
-    .email('Valid email address required'),
-  type: z
-    .enum(['email_verification', 'mobile_verification', 'password_reset', 'admin_2fa'])
-    .default('email_verification')
-})
+// ─── Other schemas (unchanged) ───────────────────────────────────────────────
 
 export const applyServiceSchema = z.object({
   serviceId: z

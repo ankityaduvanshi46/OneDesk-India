@@ -40,10 +40,13 @@ export async function sendOtpEmail({ email, name, code, type }) {
   const t = getTransporter()
   const from = process.env.SMTP_FROM || 'OneDesk India <noreply@onedesk.india.gov.in>'
 
-  let title = 'Verification Code'
-  let description = 'Use the 6-digit one-time password below to complete your verification.'
+  let title = 'Sign-In / Verification Code'
+  let description = 'Use the 6-digit one-time password below to sign in to your OneDesk India account.'
 
-  if (type === 'password_reset') {
+  if (type === 'register') {
+    title = 'Create Account – Verification Code'
+    description = 'Use the 6-digit one-time password below to complete your OneDesk India account registration.'
+  } else if (type === 'password_reset') {
     title = 'Password Reset Request'
     description = 'Use the one-time code below to reset your OneDesk account password.'
   } else if (type === 'admin_2fa') {
@@ -55,7 +58,7 @@ export async function sendOtpEmail({ email, name, code, type }) {
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 580px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
       <div style="background: #0B132B; padding: 24px; text-align: center; border-bottom: 3px solid #D4AF37;">
         <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 0.5px;">OneDesk India</h1>
-        <p style="color: #D4AF37; margin: 4px 0 0; font-size: 13px;">Official Citizen Services & Document Platform</p>
+        <p style="color: #D4AF37; margin: 4px 0 0; font-size: 13px;">Official Citizen Services &amp; Document Platform</p>
       </div>
       <div style="padding: 32px 24px;">
         <p style="color: #1e293b; font-size: 16px; margin-top: 0;">Namaste <strong>${name || 'Citizen'}</strong>,</p>
@@ -65,13 +68,13 @@ export async function sendOtpEmail({ email, name, code, type }) {
           <div style="display: inline-block; background: #F8FAFC; border: 2px dashed #D4AF37; padding: 14px 32px; border-radius: 10px;">
             <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0B132B;">${code}</span>
           </div>
-          <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">Valid for 10 minutes. Do not share this code with anyone.</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">Valid for <strong>5 minutes</strong>. Do not share this code with anyone.</p>
         </div>
 
-        <p style="color: #64748b; font-size: 13px; line-height: 1.5;">If you did not request this verification code, please ignore this email or contact OneDesk Support immediately.</p>
+        <p style="color: #64748b; font-size: 13px; line-height: 1.5;">If you did not request this code, please ignore this email or contact OneDesk Support immediately. Your account security is our priority.</p>
       </div>
       <div style="background: #F1F5F9; padding: 16px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
-        OneDesk India Citizen Hub • Unofficial National Direct Gateway • Verified Official Portals
+        OneDesk India Citizen Hub &bull; Unofficial National Direct Gateway &bull; Verified Official Portals
       </div>
     </div>
   `
@@ -79,8 +82,8 @@ export async function sendOtpEmail({ email, name, code, type }) {
   return t.sendMail({
     from,
     to: email,
-    subject: `OneDesk India: ${title} [${code}]`,
-    text: `Your OneDesk India ${title} is: ${code}. Valid for 10 minutes.`,
+    subject: `OneDesk India: ${title} – ${code}`,
+    text: `Your OneDesk India ${title} is: ${code}. Valid for 5 minutes. Do not share this code.`,
     html
   })
 }

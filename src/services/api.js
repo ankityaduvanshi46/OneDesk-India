@@ -36,13 +36,18 @@ async function request(endpoint, options = {}) {
 
 export const api = {
   auth: {
-    register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+    // ── Passwordless OTP flow ──────────────────────────────────────────────
+    sendOtp: (payload) => request('/auth/send-otp', { method: 'POST', body: JSON.stringify(payload) }),
     verifyOtp: (payload) => request('/auth/verify-otp', { method: 'POST', body: JSON.stringify(payload) }),
     resendOtp: (payload) => request('/auth/resend-otp', { method: 'POST', body: JSON.stringify(payload) }),
+    // ── Legacy / backward-compat shims ────────────────────────────────────
+    register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
     login: (payload) => request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+    // ── Other auth routes (unchanged) ─────────────────────────────────────
     logout: () => request('/auth/logout', { method: 'POST' }),
     getMe: () => request('/auth/me'),
     updateProfile: (payload) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(payload) }),
+    // forgotPassword / resetPassword are now removed from backend; kept here for graceful handling
     forgotPassword: (payload) => request('/auth/forgot-password', { method: 'POST', body: JSON.stringify(payload) }),
     resetPassword: (payload) => request('/auth/reset-password', { method: 'POST', body: JSON.stringify(payload) })
   },

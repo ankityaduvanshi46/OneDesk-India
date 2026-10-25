@@ -6,7 +6,7 @@ export const useAuthStore = create((set, get) => ({
   isAuthenticated: false,
   loading: true,
   otpPendingEmail: null,
-  otpType: 'email_verification',
+  otpType: 'login',
   notifications: [],
   unreadNotificationsCount: 0,
 
@@ -28,29 +28,29 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  login: async (credentials) => {
-    const res = await api.auth.login(credentials)
-    if (res?.success && res.user) {
-      set({ user: res.user, isAuthenticated: true })
-      get().fetchNotifications()
-      return res.user
-    }
-    throw new Error(res?.message || 'Login failed')
-  },
+  // ── Passwordless OTP flow ─────────────────────────────────────────────────
 
-  register: async (details) => {
-    const res = await api.auth.register(details)
+  /**
+   * Step 1: Send OTP to email.
+   * type: 'login' | 'register'
+   */
+  sendOtp: async ({ email, name, type = 'login' }) => {
+    const res = await api.auth.sendOtp({ email, name, type })
     if (res?.success) {
-      set({ otpPendingEmail: res.email, otpType: 'email_verification' })
+      set({ otpPendingEmail: email, otpType: type })
       return res
     }
-    throw new Error(res?.message || 'Registration failed')
+    throw new Error(res?.message || 'Failed to send OTP')
   },
 
-  verifyOtp: async (code) => {
-    const email = get().otpPendingEmail
-    const type = get().otpType
-    const res = await api.auth.verifyOtp({ email, code, type })
+  /**
+   * Step 2: Verify OTP and sign in / create account.
+   * type: 'login' | 'register'
+   */
+  verifyOtp: async ({ email, code, type, name }) => {
+    const cleanEmail = email || get().otpPendingEmail
+    const cleanType = type || get().otpType
+    const res = await api.auth.verifyOtp({ email: cleanEmail, code, type: cleanType, name })
     if (res?.success && res.user) {
       set({ user: res.user, isAuthenticated: true, otpPendingEmail: null })
       get().fetchNotifications()
@@ -65,9 +65,32 @@ export const useAuthStore = create((set, get) => ({
     return api.auth.resendOtp({ email, type })
   },
 
-  setOtpPending: (email, type = 'email_verification') => {
+  setOtpPending: (email, type = 'login') => {
     set({ otpPendingEmail: email, otpType: type })
   },
+
+  // ── Legacy shims (kept for any code that still calls login/register) ───────
+
+  login: async ({ identifier, email, password } = {}) => {
+    // Redirect to OTP flow
+    const cleanEmail = (email || identifier || '').trim().toLowerCase()
+    return get().sendOtp({ email: cleanEmail, type: 'login' })
+  },
+
+  register: async (details) => {
+    const res = await api.auth.sendOtp({
+      email: details.email?.trim().toLowerCase(),
+      name: details.name?.trim(),
+      type: 'register'
+    })
+    if (res?.success) {
+      set({ otpPendingEmail: res.email || details.email, otpType: 'register' })
+      return res
+    }
+    throw new Error(res?.message || 'Registration failed')
+  },
+
+  // ── Other ─────────────────────────────────────────────────────────────────
 
   logout: async () => {
     try {

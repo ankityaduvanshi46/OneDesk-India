@@ -6,21 +6,22 @@ import { OTP } from '../models/OTP.js'
 import { Application } from '../models/Application.js'
 import { Document } from '../models/Document.js'
 import { AuditLog } from '../models/AuditLog.js'
-import { generateOTP, hashGovId, maskGovId } from '../utils/otp.js'
+import { generateOTP, hashOTP, verifyOTP, hashGovId, maskGovId } from '../utils/otp.js'
 import { generateRegisterId } from '../utils/idGenerator.js'
 import { sendOtpEmail } from '../utils/mailer.js'
 import { authenticate, optionalAuth } from '../middleware/auth.js'
 import { authLimiter, otpLimiter } from '../middleware/rateLimiter.js'
 import { validateBody } from '../middleware/validate.js'
 import {
-  registerSchema,
-  loginSchema,
+  sendOtpSchema,
   verifyOtpSchema,
   resendOtpSchema,
   updateProfileSchema
 } from '../schemas/index.js'
 
 const router = express.Router()
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function generateTokenAndSetCookie(res, user) {
   const secret = process.env.JWT_SECRET || 'onedesk_super_secret_jwt_key_2026_secure_random_string_89327498'
@@ -42,183 +43,217 @@ function generateTokenAndSetCookie(res, user) {
   return token
 }
 
-router.post('/register', authLimiter, validateBody(registerSchema), async (req, res, next) => {
+function dbCheck(res) {
+  if (!isDBConnected()) {
+    res.status(503).json({
+      success: false,
+      message: 'Database connection is temporarily unavailable. Please verify MONGODB_URI configuration in Vercel settings.'
+    })
+    return false
+  }
+  return true
+}
+
+// Max OTPs allowed per email per hour (prevents brute-force OTP spam)
+const OTP_HOURLY_LIMIT = 5
+// Minimum seconds between resend requests
+const OTP_RESEND_COOLDOWN_SECS = 60
+// OTP validity in milliseconds
+const OTP_EXPIRY_MS = 5 * 60 * 1000
+
+// ─── POST /auth/send-otp ────────────────────────────────────────────────────
+// Unified: handles both 'login' and 'register' OTP dispatch.
+// Does NOT reveal whether an email is already registered.
+router.post('/send-otp', authLimiter, validateBody(sendOtpSchema), async (req, res, next) => {
   try {
-    if (!isDBConnected()) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection is temporarily unavailable. Please verify MONGODB_URI configuration in Vercel settings.'
-      })
-    }
-    const { name, email, mobile, password, govIdNumber, govIdType = 'aadhaar_last4', state, city, dpdpConsent } = req.body
+    if (!dbCheck(res)) return
 
+    const { email, name, type } = req.body
     const cleanEmail = email.trim().toLowerCase()
-    const cleanMobile = mobile.trim()
+    const ipAddress = req.ip || ''
 
-    const existingEmail = await User.findOne({ email: cleanEmail })
-    if (existingEmail) {
-      return res.status(409).json({
-        success: false,
-        code: 'DUPLICATE_ENTRY',
-        field: 'email',
-        message: 'An account with this email address already exists. Please log in instead.'
-      })
-    }
+    // ── Resend cooldown check ──────────────────────────────────────────────
+    const existing = await OTP.findOne({ identifier: cleanEmail, type }).sort({ createdAt: -1 })
 
-    const existingMobile = await User.findOne({ mobile: cleanMobile })
-    if (existingMobile) {
-      return res.status(409).json({
-        success: false,
-        code: 'DUPLICATE_ENTRY',
-        field: 'mobile',
-        message: 'An account with this mobile number already exists. Each citizen is allowed only one account.'
-      })
-    }
-
-    let govHash = null
-    let govMask = null
-    if (govIdNumber && govIdNumber.trim()) {
-      govHash = hashGovId(govIdNumber.trim())
-      govMask = maskGovId(govIdNumber.trim())
-
-      const existingGovId = await User.findOne({ govIdHash: govHash })
-      if (existingGovId) {
-        return res.status(409).json({
+    if (existing) {
+      const secondsSinceLast = (Date.now() - new Date(existing.lastSentAt).getTime()) / 1000
+      if (secondsSinceLast < OTP_RESEND_COOLDOWN_SECS) {
+        const waitSec = Math.ceil(OTP_RESEND_COOLDOWN_SECS - secondsSinceLast)
+        return res.status(429).json({
           success: false,
-          code: 'DUPLICATE_ENTRY',
-          field: 'govId',
-          message: 'An account is already linked to this Government Identity Number. Duplicate registrations are prohibited under our 1-Person-1-Account policy.'
+          code: 'RESEND_COOLDOWN',
+          message: `Please wait ${waitSec} second(s) before requesting a new code.`,
+          retryAfterSeconds: waitSec
+        })
+      }
+
+      // ── Hourly rate limit ────────────────────────────────────────────────
+      const windowAge = Date.now() - new Date(existing.hourlyWindowStart).getTime()
+      if (windowAge < 60 * 60 * 1000 && existing.hourlySendCount >= OTP_HOURLY_LIMIT) {
+        return res.status(429).json({
+          success: false,
+          code: 'HOURLY_LIMIT',
+          message: 'You have requested too many verification codes. Please try again after an hour.'
         })
       }
     }
 
-    let registerId = generateRegisterId()
-    let duplicateCheck = await User.findOne({ registerId })
-    while (duplicateCheck) {
-      registerId = generateRegisterId()
-      duplicateCheck = await User.findOne({ registerId })
-    }
+    // ── Generate & hash OTP ────────────────────────────────────────────────
+    const plainCode = generateOTP(6)
+    const hashedCode = hashOTP(plainCode)
+    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MS)
 
-    const userData = {
-      registerId,
-      name: name.trim(),
-      email: cleanEmail,
-      mobile: cleanMobile,
-      passwordHash: password,
-      role: 'user',
-      consentGivenAt: new Date(),
-      consentVersion: 'DPDP-2023-v1',
-      address: {
-        state: state || '',
-        city: city || ''
-      }
-    }
+    // ── Delete old OTPs for this email+type, create fresh one ─────────────
+    await OTP.deleteMany({ identifier: cleanEmail, type })
 
-    if (govHash) {
-      userData.govIdHash = govHash
-      userData.govIdMasked = govMask
-      userData.govIdType = govIdType
-    }
+    const hourlyWindowStart = existing && (Date.now() - new Date(existing.hourlyWindowStart).getTime()) < 60 * 60 * 1000
+      ? existing.hourlyWindowStart
+      : new Date()
 
-    const newUser = new User(userData)
-    await newUser.save()
+    const hourlySendCount = existing && (Date.now() - new Date(existing.hourlyWindowStart).getTime()) < 60 * 60 * 1000
+      ? existing.hourlySendCount + 1
+      : 1
 
-    const otpCode = generateOTP(6)
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
-
-    await OTP.deleteMany({ identifier: cleanEmail, type: 'email_verification' })
     await OTP.create({
       identifier: cleanEmail,
-      code: otpCode,
-      type: 'email_verification',
-      expiresAt
+      hashedCode,
+      type,
+      expiresAt,
+      lastSentAt: new Date(),
+      hourlyWindowStart,
+      hourlySendCount,
+      ipAddress
     })
 
-    try {
-      await sendOtpEmail({
-        email: cleanEmail,
-        name: newUser.name,
-        code: otpCode,
-        type: 'email_verification'
-      })
-    } catch (mailError) {
-      console.warn('[Registration] Could not dispatch OTP email via SMTP:', mailError.message)
+    // ── Resolve display name for email ────────────────────────────────────
+    let displayName = name
+    if (!displayName) {
+      const user = await User.findOne({ email: cleanEmail }).select('name').lean()
+      displayName = user?.name || 'Citizen'
     }
 
-    await AuditLog.create({
-      userId: newUser._id,
-      userRole: newUser.role,
-      action: 'USER_REGISTER',
-      resource: 'User',
-      resourceId: newUser._id.toString(),
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent') || ''
-    })
+    // ── Send OTP email ────────────────────────────────────────────────────
+    try {
+      await sendOtpEmail({ email: cleanEmail, name: displayName, code: plainCode, type })
+    } catch (mailErr) {
+      console.warn('[send-otp] Email dispatch error:', mailErr.message)
+      // Still continue — in dev mode the OTP is printed to console by mock transporter
+    }
 
-    res.status(201).json({
+    return res.json({
       success: true,
-      message: 'Registration successful! A 6-digit verification code has been dispatched to your email.',
-      registerId: newUser.registerId,
-      email: newUser.email
+      message: 'A 6-digit verification code has been sent to your email. It is valid for 5 minutes.',
+      email: cleanEmail
     })
-  } catch (error) {
-    next(error)
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── POST /auth/verify-otp ──────────────────────────────────────────────────
+// Verifies the OTP. On success: creates/finds user and issues JWT cookie.
+// type = 'login' | 'register'
 router.post('/verify-otp', otpLimiter, validateBody(verifyOtpSchema), async (req, res, next) => {
   try {
-    const { email, code, type } = req.body
+    if (!dbCheck(res)) return
 
+    const { email, code, type, name } = req.body
     const cleanEmail = email.trim().toLowerCase()
-    const otpRecord = await OTP.findOne({
-      identifier: cleanEmail,
-      type,
-      verified: false
-    }).sort({ createdAt: -1 })
 
-    if (!otpRecord) {
+    const otpRecord = await OTP.findOne({ identifier: cleanEmail, type }).sort({ createdAt: -1 })
+
+    if (!otpRecord || otpRecord.verified) {
       return res.status(400).json({
         success: false,
-        message: 'No active verification code found or it has already expired. Please request a new code.'
+        code: 'OTP_NOT_FOUND',
+        message: 'No active verification code found. Please request a new code.'
       })
     }
 
     if (new Date() > otpRecord.expiresAt) {
+      await OTP.deleteOne({ _id: otpRecord._id })
       return res.status(400).json({
         success: false,
+        code: 'OTP_EXPIRED',
         message: 'Verification code has expired. Please request a new code.'
       })
     }
 
-    if (otpRecord.attempts >= 3) {
+    if (otpRecord.attempts >= otpRecord.maxAttempts) {
+      await OTP.deleteOne({ _id: otpRecord._id })
       return res.status(429).json({
         success: false,
-        message: 'Maximum attempts reached for this code. Please request a new verification code.'
+        code: 'OTP_BLOCKED',
+        message: 'Too many incorrect attempts. This code has been invalidated. Please request a new one.'
       })
     }
 
-    if (otpRecord.code !== code.trim()) {
+    // Timing-safe hash comparison
+    if (!verifyOTP(code, otpRecord.hashedCode)) {
       otpRecord.attempts += 1
       await otpRecord.save()
+      const remaining = otpRecord.maxAttempts - otpRecord.attempts
       return res.status(400).json({
         success: false,
-        message: `Incorrect verification code. ${3 - otpRecord.attempts} attempt(s) remaining.`
+        code: 'OTP_WRONG',
+        message: `Incorrect verification code. ${remaining} attempt(s) remaining.`,
+        attemptsRemaining: remaining
       })
     }
 
-    otpRecord.verified = true
-    await otpRecord.save()
+    // ── OTP is correct — delete it immediately (single-use) ───────────────
+    await OTP.deleteOne({ _id: otpRecord._id })
 
-    const user = await User.findOne({ email: cleanEmail })
+    // ── Upsert user ───────────────────────────────────────────────────────
+    let user = await User.findOne({ email: cleanEmail })
+
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' })
+      // New user — create account
+      let registerId = generateRegisterId()
+      while (await User.findOne({ registerId })) {
+        registerId = generateRegisterId()
+      }
+
+      const newName = name?.trim() || cleanEmail.split('@')[0]
+
+      user = new User({
+        registerId,
+        name: newName,
+        email: cleanEmail,
+        role: 'user',
+        isEmailVerified: true,
+        status: 'active',
+        consentGivenAt: new Date(),
+        consentVersion: 'DPDP-2023-v1'
+      })
+      await user.save()
+
+      await AuditLog.create({
+        userId: user._id,
+        userRole: user.role,
+        action: 'USER_REGISTER',
+        resource: 'User',
+        resourceId: user._id.toString(),
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent') || '',
+        details: { method: 'otp_passwordless' }
+      })
+    } else {
+      // Existing user — mark email verified, update last login
+      if (!user.isEmailVerified) {
+        user.isEmailVerified = true
+        user.status = 'active'
+      }
+      user.lastLoginAt = new Date()
+      await user.save()
     }
 
-    if (type === 'email_verification') {
-      user.isEmailVerified = true
-      user.status = 'active'
-      await user.save()
+    if (user.status === 'suspended') {
+      return res.status(403).json({
+        success: false,
+        code: 'ACCOUNT_SUSPENDED',
+        message: 'Your account has been suspended. Please contact support.'
+      })
     }
 
     const token = generateTokenAndSetCookie(res, user)
@@ -226,139 +261,84 @@ router.post('/verify-otp', otpLimiter, validateBody(verifyOtpSchema), async (req
     await AuditLog.create({
       userId: user._id,
       userRole: user.role,
-      action: 'OTP_VERIFIED',
+      action: type === 'register' ? 'USER_REGISTER_OTP' : 'USER_LOGIN_OTP',
       resource: 'User',
       resourceId: user._id.toString(),
       ipAddress: req.ip,
       userAgent: req.get('user-agent') || '',
-      details: { verificationType: type }
+      details: { method: 'otp_passwordless', type }
     })
 
-    res.json({
+    return res.json({
       success: true,
-      message: 'Account verified successfully!',
+      message: type === 'register' ? 'Account created and verified successfully!' : `Welcome back, ${user.name}!`,
       token,
       user
     })
-  } catch (error) {
-    next(error)
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── POST /auth/resend-otp ───────────────────────────────────────────────────
+// Delegates to /send-otp logic (same cooldown/limit rules apply).
 router.post('/resend-otp', otpLimiter, validateBody(resendOtpSchema), async (req, res, next) => {
+  // Re-use send-otp handler — just proxy the request body
+  req.body.type = req.body.type || 'login'
+  return router.handle(
+    Object.assign(req, { url: '/send-otp', path: '/send-otp' }),
+    res,
+    next
+  )
+})
+
+// ─── POST /auth/register ─────────────────────────────────────────────────────
+// Backward-compat shim: maps old register call to the new send-otp flow.
+router.post('/register', authLimiter, async (req, res, next) => {
   try {
-    const { email, type } = req.body
+    if (!dbCheck(res)) return
 
-    const cleanEmail = email.trim().toLowerCase()
-    const user = await User.findOne({ email: cleanEmail })
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Account not found with this email.' })
+    const { name, email } = req.body
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' })
     }
 
-    const otpCode = generateOTP(6)
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
-
-    await OTP.deleteMany({ identifier: cleanEmail, type })
-    await OTP.create({
-      identifier: cleanEmail,
-      code: otpCode,
-      type,
-      expiresAt
-    })
-
-    try {
-      await sendOtpEmail({
-        email: cleanEmail,
-        name: user.name,
-        code: otpCode,
-        type
-      })
-    } catch (mailError) {
-      console.warn('[ResendOTP] Could not dispatch OTP email via SMTP:', mailError.message)
-    }
-
-    res.json({
-      success: true,
-      message: 'A fresh 6-digit verification code has been dispatched to your email.'
-    })
-  } catch (error) {
-    next(error)
+    // Delegate to send-otp with type='register'
+    req.body = { email: email.trim().toLowerCase(), name: name?.trim(), type: 'register' }
+    return router.handle(
+      Object.assign(req, { url: '/send-otp', path: '/send-otp' }),
+      res,
+      next
+    )
+  } catch (err) {
+    next(err)
   }
 })
 
-router.post('/login', authLimiter, validateBody(loginSchema), async (req, res, next) => {
+// ─── POST /auth/login ────────────────────────────────────────────────────────
+// Backward-compat shim: maps old login call to the new send-otp flow.
+router.post('/login', authLimiter, async (req, res, next) => {
   try {
-    if (!isDBConnected()) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection is temporarily unavailable. Please verify MONGODB_URI configuration in Vercel settings.'
-      })
-    }
-    const { identifier, password } = req.body
+    if (!dbCheck(res)) return
 
-    const cleanId = identifier.trim()
-    const user = await User.findOne({
-      $or: [
-        { email: cleanId.toLowerCase() },
-        { mobile: cleanId },
-        { registerId: cleanId.toUpperCase() }
-      ]
-    })
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials. No registered account matches these details.'
-      })
+    // Accept both old { identifier } and new { email }
+    const email = (req.body.email || req.body.identifier || '').trim().toLowerCase()
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' })
     }
 
-    if (user.isLocked()) {
-      const waitMinutes = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000))
-      return res.status(403).json({
-        success: false,
-        message: `Account is temporarily locked due to multiple failed login attempts. Please try again in ${waitMinutes} minute(s).`
-      })
-    }
-
-    const isMatch = await user.comparePassword(password)
-    if (!isMatch) {
-      await user.incrementLoginAttempts()
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid password. Please verify and try again.'
-      })
-    }
-
-    if (user.failedLoginAttempts > 0) {
-      await user.resetLoginAttempts()
-    }
-
-    user.lastLoginAt = new Date()
-    await user.save()
-
-    const token = generateTokenAndSetCookie(res, user)
-
-    await AuditLog.create({
-      userId: user._id,
-      userRole: user.role,
-      action: 'USER_LOGIN',
-      resource: 'User',
-      resourceId: user._id.toString(),
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent') || ''
-    })
-
-    res.json({
-      success: true,
-      message: `Welcome back, ${user.name}!`,
-      token,
-      user
-    })
-  } catch (error) {
-    next(error)
+    req.body = { email, type: 'login' }
+    return router.handle(
+      Object.assign(req, { url: '/send-otp', path: '/send-otp' }),
+      res,
+      next
+    )
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── POST /auth/logout ───────────────────────────────────────────────────────
 router.post('/logout', optionalAuth, async (req, res, next) => {
   try {
     const isProduction = process.env.NODE_ENV === 'production'
@@ -381,22 +361,18 @@ router.post('/logout', optionalAuth, async (req, res, next) => {
       }).catch(() => null)
     }
 
-    res.json({
-      success: true,
-      message: 'Logged out successfully.'
-    })
-  } catch (error) {
-    next(error)
+    res.json({ success: true, message: 'Logged out successfully.' })
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── GET /auth/me ─────────────────────────────────────────────────────────────
 router.get('/me', authenticate, async (req, res) => {
-  res.json({
-    success: true,
-    user: req.user
-  })
+  res.json({ success: true, user: req.user })
 })
 
+// ─── PUT /auth/profile ───────────────────────────────────────────────────────
 router.put('/profile', authenticate, validateBody(updateProfileSchema), async (req, res, next) => {
   try {
     const { name, address, profilePhoto } = req.body
@@ -414,17 +390,13 @@ router.put('/profile', authenticate, validateBody(updateProfileSchema), async (r
     }
 
     await user.save()
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully.',
-      user
-    })
-  } catch (error) {
-    next(error)
+    res.json({ success: true, message: 'Profile updated successfully.', user })
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── GET /auth/export-data ───────────────────────────────────────────────────
 router.get('/export-data', authenticate, async (req, res, next) => {
   try {
     const userId = req.user._id
@@ -449,11 +421,12 @@ router.get('/export-data', authenticate, async (req, res, next) => {
     res.setHeader('Content-Type', 'application/json')
     res.setHeader('Content-Disposition', `attachment; filename="onedesk-data-export-${req.user.registerId}.json"`)
     res.json(archive)
-  } catch (error) {
-    next(error)
+  } catch (err) {
+    next(err)
   }
 })
 
+// ─── DELETE /auth/delete-account ─────────────────────────────────────────────
 router.delete('/delete-account', authenticate, async (req, res, next) => {
   try {
     const userId = req.user._id
@@ -487,145 +460,28 @@ router.delete('/delete-account', authenticate, async (req, res, next) => {
       success: true,
       message: 'Your OneDesk citizen account and associated draft records have been permanently erased under the DPDP Act 2023.'
     })
-  } catch (error) {
-    next(error)
+  } catch (err) {
+    next(err)
   }
 })
 
-router.post('/forgot-password', authLimiter, async (req, res, next) => {
-  try {
-    const { identifier } = req.body
-    if (!identifier) {
-      return res.status(400).json({ success: false, message: 'Please provide your registered email or mobile.' })
-    }
-
-    const clean = identifier.trim()
-    const user = await User.findOne({
-      $or: [{ email: clean.toLowerCase() }, { mobile: clean }]
-    })
-
-    if (!user) {
-      return res.json({
-        success: true,
-        message: 'If an account exists with these details, a password reset code has been sent.'
-      })
-    }
-
-    const otpCode = generateOTP(6)
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
-
-    await OTP.deleteMany({ identifier: user.email, type: 'password_reset' })
-    await OTP.create({
-      identifier: user.email,
-      code: otpCode,
-      type: 'password_reset',
-      expiresAt
-    })
-
-    try {
-      await sendOtpEmail({
-        email: user.email,
-        name: user.name,
-        code: otpCode,
-        type: 'password_reset'
-      })
-    } catch (mailError) {
-      console.warn('[ForgotPassword] Could not dispatch email via SMTP:', mailError.message)
-    }
-
-    res.json({
-      success: true,
-      message: 'Password reset code has been sent to your registered email.',
-      email: user.email
-    })
-  } catch (error) {
-    next(error)
-  }
+// ─── Removed: /forgot-password and /reset-password ───────────────────────────
+// The app now uses passwordless OTP login — there are no passwords to reset.
+// Legacy clients hitting these routes will get a clear guidance message.
+router.post('/forgot-password', (req, res) => {
+  res.status(410).json({
+    success: false,
+    code: 'FEATURE_REMOVED',
+    message: 'Password-based login has been replaced by secure email OTP. Please use /auth/send-otp to sign in.'
+  })
 })
 
-router.post('/reset-password', authLimiter, async (req, res, next) => {
-  try {
-    const { email, code, newPassword } = req.body
-
-    if (!email || !code || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email, reset code, and new password are required.'
-      })
-    }
-
-    if (newPassword.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 8 characters long.'
-      })
-    }
-
-    const cleanEmail = email.trim().toLowerCase()
-    const otpRecord = await OTP.findOne({
-      identifier: cleanEmail,
-      type: 'password_reset',
-      verified: false
-    }).sort({ createdAt: -1 })
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        success: false,
-        message: 'No active password reset code found or it has already expired. Please request a new code.'
-      })
-    }
-
-    if (new Date() > otpRecord.expiresAt) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password reset code has expired. Please request a new code.'
-      })
-    }
-
-    if (otpRecord.attempts >= 3) {
-      return res.status(429).json({
-        success: false,
-        message: 'Maximum attempts reached for this code. Please request a new password reset code.'
-      })
-    }
-
-    if (otpRecord.code !== code.trim()) {
-      otpRecord.attempts = (otpRecord.attempts || 0) + 1
-      await otpRecord.save()
-      return res.status(400).json({
-        success: false,
-        message: `Incorrect reset code. ${3 - otpRecord.attempts} attempt(s) remaining.`
-      })
-    }
-
-    otpRecord.verified = true
-    await otpRecord.save()
-
-    const user = await User.findOne({ email: cleanEmail })
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' })
-    }
-
-    user.passwordHash = newPassword
-    await user.save()
-
-    await AuditLog.create({
-      userId: user._id,
-      userRole: user.role,
-      action: 'PASSWORD_RESET',
-      resource: 'User',
-      resourceId: user._id.toString(),
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent') || ''
-    })
-
-    res.json({
-      success: true,
-      message: 'Password has been successfully updated. You may now log in with your new password.'
-    })
-  } catch (error) {
-    next(error)
-  }
+router.post('/reset-password', (req, res) => {
+  res.status(410).json({
+    success: false,
+    code: 'FEATURE_REMOVED',
+    message: 'Password-based login has been replaced by secure email OTP. Please use /auth/send-otp to sign in.'
+  })
 })
 
 export default router

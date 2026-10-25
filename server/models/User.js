@@ -40,8 +40,8 @@ const userSchema = new mongoose.Schema(
       trim: true
     },
     passwordHash: {
-      type: String,
-      required: [true, 'Password is required']
+      type: String
+      // Optional: legacy users may have a password hash stored; new users login via OTP only
     },
     role: {
       type: String,
