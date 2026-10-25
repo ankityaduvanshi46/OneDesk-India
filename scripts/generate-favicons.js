@@ -8,7 +8,26 @@ const __dirname = path.dirname(__filename)
 const rootDir = path.resolve(__dirname, '..')
 const publicDir = path.join(rootDir, 'public')
 
-console.log('[Favicon Generator] Generating crisp multi-resolution favicons & touch icons...')
+console.log('[Favicon Generator] Checking favicons & touch icons...')
+
+const icoPath = path.join(publicDir, 'favicon.ico')
+const icon48Path = path.join(publicDir, 'favicon-48x48.png')
+
+// Check if sips is available (macOS utility)
+let hasSips = false
+try {
+  execSync('which sips', { stdio: 'pipe' })
+  hasSips = true
+} catch {
+  hasSips = false
+}
+
+if (!hasSips) {
+  if (fs.existsSync(icoPath) && fs.existsSync(icon48Path)) {
+    console.log('✅  Pre-generated favicons exist and sips is not present (Linux/CI environment). Skipping regeneration.')
+    process.exit(0)
+  }
+}
 
 const svgPath = path.join(publicDir, 'favicon.svg')
 if (!fs.existsSync(svgPath)) {
