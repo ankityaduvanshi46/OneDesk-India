@@ -63,15 +63,15 @@ export default function OtpInput({ value = '', onChange, disabled = false, error
   }
 
   const boxBase = [
-    'w-11 h-14 sm:w-12 sm:h-14 text-center text-xl font-bold rounded-xl border-2 outline-none transition-all duration-150',
-    'focus:border-yellow-500 focus:ring-2 focus:ring-yellow-300 bg-slate-50',
+    'w-10 h-12 xs:w-11 xs:h-14 sm:w-12 sm:h-14 text-center text-lg xs:text-xl font-bold rounded-xl border-2 outline-none transition-all duration-150',
+    'focus:border-yellow-500 focus:ring-2 focus:ring-yellow-300 bg-slate-50 dark:bg-royal-900',
     disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-text'
   ].join(' ')
 
-  const boxBorder = error ? 'border-red-400 text-red-600' : 'border-slate-300 text-slate-800'
+  const boxBorder = error ? 'border-red-400 text-red-600' : 'border-slate-300 dark:border-royal-700 text-slate-800 dark:text-white'
 
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste} aria-label="OTP input">
+    <div className="flex gap-1.5 xs:gap-2 justify-center max-w-full px-1" onPaste={handlePaste} aria-label="OTP input">
       {digits.map((digit, i) => (
         <input
           key={i}

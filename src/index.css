@@ -15,11 +15,14 @@
   html {
     font-size: calc(16px * var(--font-size-multiplier, 1));
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-slate-50 dark:bg-royal-900 text-gray-900 dark:text-gray-100 antialiased selection:bg-brand-primary selection:text-white;
     font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   * {
