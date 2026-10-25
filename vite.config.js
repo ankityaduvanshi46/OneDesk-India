@@ -7,7 +7,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'logo.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'favicon.svg',
+        'favicon-48x48.png',
+        'apple-touch-icon.png',
+        'robots.txt',
+        'logo.svg',
+        'logo.png',
+        'icon-192.png',
+        'icon-512.png'
+      ],
       manifest: {
         name: 'OneDesk India',
         short_name: 'OneDesk',
@@ -17,7 +27,10 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          { src: 'favicon.svg', sizes: '192x192 512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+          { src: 'favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+          { src: 'favicon.svg', sizes: '192x192 512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },
       workbox: {

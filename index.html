@@ -2,8 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Google Search Site Name & Identity Specifications -->
+    <meta name="application-name" content="OneDesk India" />
+    <meta name="apple-mobile-web-app-title" content="OneDesk India" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#FF6B35" />
     <meta name="description" content="OneDesk India – Verified single-window directory of direct links to 80+ official Indian government service portals. Aadhaar, PAN, Passport, DigiLocker, and EPFO." />
@@ -23,16 +35,18 @@
     <meta property="og:title" content="OneDesk India – Indian Government Services Directory" />
     <meta property="og:description" content="Unified single-window directory of verified direct links to 80+ official Indian government service websites." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://onedesk-india.vercel.app" />
-    <meta property="og:image" content="https://onedesk-india.vercel.app/logo.svg" />
+    <meta property="og:url" content="https://onedesk-india.vercel.app/" />
+    <meta property="og:image" content="https://onedesk-india.vercel.app/logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
     <meta property="og:locale" content="en_IN" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@OneDeskIndia" />
     <meta name="twitter:title" content="OneDesk India – Official Government Services Directory" />
     <meta name="twitter:description" content="Find verified official Indian government service portals instantly." />
-    <meta name="twitter:image" content="https://onedesk-india.vercel.app/logo.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="twitter:image" content="https://onedesk-india.vercel.app/logo.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -65,15 +79,43 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "OneDesk India",
-      "url": "https://onedesk-india.vercel.app",
-      "description": "Unified single-window directory of verified Indian government service portals",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://onedesk-india.vercel.app/services?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://onedesk-india.vercel.app/#website",
+          "name": "OneDesk India",
+          "alternateName": [
+            "OneDesk",
+            "OneDeskIndia",
+            "OneDesk India Portal",
+            "OneDesk Government Services"
+          ],
+          "url": "https://onedesk-india.vercel.app/",
+          "description": "Unified single-window directory of verified Indian government service portals",
+          "publisher": {
+            "@id": "https://onedesk-india.vercel.app/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://onedesk-india.vercel.app/services?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://onedesk-india.vercel.app/#organization",
+          "name": "OneDesk India",
+          "url": "https://onedesk-india.vercel.app/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://onedesk-india.vercel.app/icon-512.png",
+            "width": 512,
+            "height": 512
+          },
+          "image": "https://onedesk-india.vercel.app/logo.png",
+          "description": "Official citizen directory and single-window facilitation desk for verified Indian public portals."
+        }
+      ]
     }
     </script>
   </head>

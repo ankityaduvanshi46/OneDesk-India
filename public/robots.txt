@@ -12,6 +12,19 @@ Allow: /disclaimer
 Allow: /refund-policy
 Allow: /verify-document
 
+# Allow search engine crawlers full access to favicons, touch icons & brand assets
+Allow: /favicon.ico
+Allow: /favicon.svg
+Allow: /favicon-*.png
+Allow: /apple-touch-icon.png
+Allow: /icon-*.png
+Allow: /logo.png
+Allow: /logo.svg
+Allow: /manifest.webmanifest
+
+User-agent: Googlebot-Image
+Allow: /
+
 # Disallow Private Citizen Vault & Admin Workspaces
 Disallow: /admin
 Disallow: /dashboard

@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 
 const SITE_URL = 'https://onedesk-india.vercel.app'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.svg`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.png`
 
 export default function SEOHead({
   title,
@@ -38,9 +38,11 @@ export default function SEOHead({
     {
       '@context': 'https://schema.org',
       '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
       name: 'OneDesk India',
-      url: SITE_URL,
-      logo: `${SITE_URL}/logo.svg`,
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/icon-512.png`,
+      image: `${SITE_URL}/logo.png`,
       description: 'Unified citizen facilitation desk providing verified direct access to official Indian government portals.',
       foundingLocation: 'Lucknow, Uttar Pradesh, India',
       contactPoint: {
@@ -53,8 +55,13 @@ export default function SEOHead({
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
       name: 'OneDesk India',
-      url: SITE_URL,
+      alternateName: ['OneDesk', 'OneDeskIndia', 'OneDesk India Portal'],
+      url: `${SITE_URL}/`,
+      publisher: {
+        '@id': `${SITE_URL}/#organization`
+      },
       potentialAction: {
         '@type': 'SearchAction',
         target: `${SITE_URL}/services?q={search_term_string}`,
@@ -69,6 +76,8 @@ export default function SEOHead({
   return (
     <Helmet htmlAttributes={{ lang }}>
       <title>{fullTitle}</title>
+      <meta name="application-name" content="OneDesk India" />
+      <meta name="apple-mobile-web-app-title" content="OneDesk India" />
       <meta name="description" content={cleanDescription} />
       <meta name="robots" content={robotsContent} />
       {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
